@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #00C853; /* Accent Emerald Green */
+  --color-primary-foreground: #ffffff;
+  
+  --color-background: #0D0F12; /* Premium Dark Base */
+  --color-foreground: #FFFFFF;
+  
+  --color-card: #171A21; /* Deep Cards */
+  --color-card-foreground: #FFFFFF;
+  
+  --color-popover: #171A21;
+  --color-popover-foreground: #FFFFFF;
+  
+  --color-secondary: #1E232D;
+  --color-secondary-foreground: #FFFFFF;
+  
+  --color-muted: #1E232D;
+  --color-muted-foreground: #94A3B8; /* Slate Texts */
+  
+  --color-accent: #00C853;
+  --color-accent-foreground: #ffffff;
+  
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  
+  --color-border: #262B33;
+  --color-input: #262B33;
+  --color-ring: #00C853;
+}
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #0D0F12;
+  --card: #F8FAFC;
+  --border: #E2E8F0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0D0F12;
+    --foreground: #FFFFFF;
+    --card: #171A21;
+    --border: #262B33;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+}
