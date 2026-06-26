@@ -1,13 +1,73 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+}
+
+enum ContractStatus {
+  PENDING
+  SIGNED
+  CANCELLED
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  uid                 String?   @unique
+  name                String?
+  phone               String    @unique
+  pinfl               String?   @unique
+  image               String?
+  freeContractsUsed   Int       @default(0)
+  paidContractCredits Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  contracts         Contract[] @relation("Creator")
+  receivedContracts Contract[] @relation("Recipient")
+  payments          Payment[]
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  orderId       String   @unique
+  amount        Float
+  provider      String   // "click" | "payme"
+  transactionId String?
+  performTime   DateTime?
+  status        String   @default("PENDING") // PENDING | SUCCESS | FAILED | CANCELLED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Contract {
+  id              String    @id @default(cuid())
+  cid             String?   @unique
+  title           String
+  content         String
+  amount          Float?
+  status          String    @default("PENDING") // PENDING | SENT | ACCEPTED | REJECTED | SIGNED | CANCELLED
+
+  creatorId       String
+  creator         User      @relation("Creator", fields: [creatorId], references: [id])
+
+  recipientId     String?
+  recipient       User?     @relation("Recipient", fields: [recipientId], references: [id])
+
+  recipientPhone  String?
+  recipientPinfl  String?
+
+  terms           String?   @default("[]")
+
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
