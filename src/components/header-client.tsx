@@ -99,21 +99,13 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
                     </button>
                   </div>
                 ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="hidden text-sm font-bold text-muted-foreground transition-colors hover:text-primary md:block"
-                    >
-                      {t.login}
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="group relative hidden sm:flex items-center gap-1 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95"
-                    >
-                      <span className="relative z-10 font-black">{t.register}</span>
-                      <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
-                    </Link>
-                  </>
+                  <Link
+                    href="/register"
+                    className="group relative hidden sm:flex items-center gap-1 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95"
+                  >
+                    <span className="relative z-10 font-black">{t.register}</span>
+                    <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
+                  </Link>
                 )}
 
                 {/* Mobile Menu Button */}
@@ -146,7 +138,6 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
                   { name: t.dashboard, href: "/dashboard" },
                   { name: t.profile, href: "/profile" },
                 ] : [
-                  { name: t.login, href: "/login" },
                   { name: t.register, href: "/register" },
                 ])
               ].map((item) => (

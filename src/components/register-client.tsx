@@ -2,7 +2,6 @@
 
 import { useState, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { sendSmsCode, verifySmsCode } from "@/lib/actions";
 import { User, Phone, Hash, ChevronRight, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
@@ -188,14 +187,6 @@ export function RegisterClient({ lang }: { lang: Language }) {
             )}
           </AnimatePresence>
 
-          <div className="mt-10 border-t border-white/10 pt-8 text-center">
-            <p className="text-sm font-medium text-muted-foreground">
-              {t.hasAccount}{" "}
-              <Link href="/login" className="font-black text-primary hover:underline">
-                {translations[lang].nav.login}
-              </Link>
-            </p>
-          </div>
         </div>
       </motion.div>
     </div>

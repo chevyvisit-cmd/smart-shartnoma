@@ -106,37 +106,6 @@ export async function verifySmsCode(phone: string, code: string, userData: any) 
   }
 }
 
-export async function loginSmsCode(phone: string) {
-  const user = await db.user.findUnique({ where: { phone } });
-  if (!user) {
-    return { error: "Bu raqam bilan ro'yxatdan o'tilmagan" };
-  }
-  return sendSmsCode(phone);
-}
-
-export async function verifyLoginSmsCode(phone: string, code: string) {
-  if (!/^\d{4}$/.test(code) && verificationCodes.get(phone) !== code) {
-    return { error: "Kod noto'g'ri" };
-  }
-
-  verificationCodes.delete(phone);
-
-  const user = await db.user.findUnique({ where: { phone } });
-  if (!user) {
-    return { error: "Foydalanuvchi topilmadi" };
-  }
-
-  const cookieStore = await cookies();
-  cookieStore.set("user_session", user.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  });
-
-  revalidatePath("/dashboard");
-  return { success: true };
-}
 
 export async function getContractQuota() {
   const user = await getUser();

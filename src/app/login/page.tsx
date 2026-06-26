@@ -1,7 +1,5 @@
-import { getLanguage } from "@/lib/actions";
-import { LoginClient } from "@/components/login-client";
+import { redirect } from "next/navigation";
 
-export default async function LoginPage() {
-  const lang = await getLanguage();
-  return <LoginClient lang={lang} />;
+export default function LoginPage() {
+  redirect("/register");
 }
