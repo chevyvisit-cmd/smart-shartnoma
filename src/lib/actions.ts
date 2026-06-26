@@ -12,6 +12,16 @@ class PaymentRequiredError extends Error {
   constructor() { super("payment_required"); }
 }
 
+// Normalize Uzbekistan phone numbers to "998XXXXXXXXX" (12 digits, no +)
+// Handles: +998XXXXXXXXX, 998XXXXXXXXX, 0XXXXXXXXX, XXXXXXXXX
+function normalizePhone(raw: string): string {
+  const d = raw.replace(/\D/g, "");
+  if (d.startsWith("998") && d.length >= 11) return d.slice(0, 12);
+  if (d.startsWith("0") && d.length === 10) return "998" + d.slice(1);
+  if (d.length === 9) return "998" + d;
+  return d;
+}
+
 // Temporary in-memory storage for codes
 const verificationCodes = new Map<string, string>();
 
@@ -53,26 +63,28 @@ export async function logout() {
 }
 
 export async function sendSmsCode(phone: string) {
+  const normalized = normalizePhone(phone);
   const code = Math.floor(1000 + Math.random() * 9000).toString();
-  verificationCodes.set(phone, code);
+  verificationCodes.set(normalized, code);
   // Temporarily disabled real SMS
-  // await sendSms(phone, code);
-  console.log(`BYPASS SMS: Phone: ${phone}, Code: ${code} (Or use 1234)`);
+  // await sendSms(normalized, code);
+  console.log(`BYPASS SMS: Phone: ${normalized}, Code: ${code} (Or use 1234)`);
   return { success: true };
 }
 
 export async function verifySmsCode(phone: string, code: string, userData: any) {
-  if (!/^\d{4}$/.test(code) && verificationCodes.get(phone) !== code) {
+  const normalized = normalizePhone(phone);
+  if (!/^\d{4}$/.test(code) && verificationCodes.get(normalized) !== code) {
     return { error: "Kod noto'g'ri" };
   }
-  
-  verificationCodes.delete(phone);
-  
+
+  verificationCodes.delete(normalized);
+
   try {
-    const existing = await db.user.findUnique({ where: { phone } });
+    const existing = await db.user.findUnique({ where: { phone: normalized } });
 
     const user = existing ?? await db.user.create({
-      data: { uid: generateUid(), name: userData.name, phone, pinfl: userData.pinfl },
+      data: { uid: generateUid(), name: userData.name, phone: normalized, pinfl: userData.pinfl },
     });
 
     const cookieStore = await cookies();
@@ -123,8 +135,10 @@ export async function createContract(formData: FormData) {
   const user = await getUser();
   if (!user) return { error: "Sessiya muddati tugagan. Iltimos, qayta kiring." };
 
-  const recipient = recipientPhone
-    ? await db.user.findFirst({ where: { phone: recipientPhone } })
+  const normalizedRecipientPhone = recipientPhone ? normalizePhone(recipientPhone) : null;
+
+  const recipient = normalizedRecipientPhone
+    ? await db.user.findFirst({ where: { phone: normalizedRecipientPhone } })
     : recipientPinfl
     ? await db.user.findFirst({ where: { pinfl: recipientPinfl } })
     : null;
@@ -203,8 +217,9 @@ export async function sendContract(contractId: string, recipientPhone?: string, 
 
   if (!recipientPhone && !recipientPinfl) return { error: "Telefon raqami yoki JShShIR kiriting" };
 
-  const recipient = recipientPhone
-    ? await db.user.findUnique({ where: { phone: recipientPhone } })
+  const normalizedSendPhone = recipientPhone ? normalizePhone(recipientPhone) : null;
+  const recipient = normalizedSendPhone
+    ? await db.user.findUnique({ where: { phone: normalizedSendPhone } })
     : await db.user.findUnique({ where: { pinfl: recipientPinfl! } });
 
   if (!recipient) return { error: "Foydalanuvchi topilmadi. Avval ro'yxatdan o'tishi kerak." };
