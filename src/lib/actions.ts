@@ -79,6 +79,7 @@ export async function verifySmsCode(phone: string, code: string, userData: any) 
     cookieStore.set("user_session", user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
@@ -175,31 +176,20 @@ export async function createContract(formData: FormData) {
 
 export async function acceptContract(contractId: string) {
   const user = await getUser();
-  if (!user) {
-    return { error: "Iltimos, avval tizimga kiring" };
-  }
+  if (!user) return { error: "Iltimos, avval tizimga kiring" };
 
-  try {
-    const contract = await db.contract.findUnique({
-      where: { id: contractId }
-    });
+  const contract = await db.contract.findUnique({ where: { id: contractId } });
+  if (!contract) return { error: "Shartnoma topilmadi" };
+  if (contract.recipientId !== user.id) return { error: "Ruxsat yo'q" };
+  if (contract.status !== "SENT") return { error: "Bu shartnoma imzolanishi mumkin emas" };
 
-    if (!contract) return { error: "Shartnoma topilmadi" };
-    
-    await db.contract.update({
-      where: { id: contractId },
-      data: { 
-        status: "SIGNED",
-        recipientId: user.id 
-      }
-    });
+  await db.contract.update({
+    where: { id: contractId },
+    data: { status: "ACCEPTED", acceptedAt: new Date() },
+  });
 
-    revalidatePath("/dashboard");
-    revalidatePath(`/contracts/${contractId}`);
-    return { success: true };
-  } catch (error) {
-    return { error: "Shartnomani imzolashda xatolik" };
-  }
+  revalidatePath("/", "layout");
+  return { success: true };
 }
 
 export async function sendContract(contractId: string, recipientPhone?: string, recipientPinfl?: string) {
@@ -284,6 +274,33 @@ export async function rejectContract(contractId: string, reason?: string) {
 
   revalidatePath("/", "layout");
   return { success: true };
+}
+
+export async function getRecentContractUpdates() {
+  const user = await getUser();
+  if (!user) return [];
+
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  return db.contract.findMany({
+    where: {
+      creatorId: user.id,
+      OR: [
+        { status: "ACCEPTED", acceptedAt: { gte: since } },
+        { status: "REJECTED", rejectedAt: { gte: since } },
+      ],
+    },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      acceptedAt: true,
+      rejectedAt: true,
+      rejectionReason: true,
+      recipient: { select: { id: true, name: true, phone: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
 }
 
 export async function updateProfile(name: string) {

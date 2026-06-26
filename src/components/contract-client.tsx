@@ -1,16 +1,21 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Clock, DollarSign, User, ShieldCheck, Download, Share2, ListChecks, Send, Phone, CreditCard, XCircle, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, CheckCircle2, Clock, DollarSign, User, ShieldCheck, Download, Share2, ListChecks, Send, Phone, CreditCard, XCircle, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { acceptSentContract, sendContract } from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { acceptSentContract, rejectContract, sendContract } from "@/lib/actions";
 import { Language, translations } from "@/lib/translations";
 
 export function ContractClient({ contract, currentUserId, lang }: { contract: any, currentUserId?: string, lang: Language }) {
   const t = translations[lang].contracts;
   const commonT = translations[lang].dashboard;
   const st = translations[lang].send;
+  const uz = lang === "uz";
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
 
   // Send state
@@ -20,9 +25,15 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
   const [sendDone, setSendDone] = useState(false);
   const [sendError, setSendError] = useState("");
 
-  const isCreator = currentUserId && contract.creatorId === currentUserId;
+  // Reject modal state
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectLoading, setRejectLoading] = useState(false);
+
+  const isCreator = !!(currentUserId && contract.creatorId === currentUserId);
+  const isRecipient = !isCreator && !!(currentUserId && contract.recipientId === currentUserId);
   const canSend = isCreator && contract.status === "PENDING" && !contract.recipientId;
-  const canSign = contract.status !== "SIGNED" && contract.status !== "ACCEPTED" && contract.status !== "REJECTED" && contract.status !== "SENT" && !isCreator;
+  const canSign = contract.status === "SENT" && isRecipient;
 
   const handleSend = async () => {
     if (!sendPhone && !sendPinfl) return;
@@ -170,14 +181,37 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
 
   const handleSign = async () => {
     if (!allAgreed) return;
-    if (!confirm(t.confirmSign)) return;
-
     setIsLoading(true);
     const result = await acceptSentContract(contract.id);
     setIsLoading(false);
+    if ("error" in result && result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(uz ? "Shartnoma qabul qilindi!" : "Договор принят!");
+      router.refresh();
+    }
+  };
 
-    if (result.error) {
-      alert(result.error);
+  const handleReject = async () => {
+    setRejectLoading(true);
+    const result = await rejectContract(contract.id, rejectReason || undefined);
+    setRejectLoading(false);
+    if ("error" in result && result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(uz ? "Shartnoma rad etildi" : "Договор отклонён");
+      setShowRejectModal(false);
+      router.refresh();
+    }
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      await navigator.share({ title: contract.title, url });
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success(uz ? "Havola nusxalandi" : "Ссылка скопирована");
     }
   };
 
@@ -193,7 +227,11 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
             <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> {t.backToDashboard}
           </Link>
           <div className="flex gap-2">
-            <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground">
+            <button
+              onClick={handleShare}
+              title={uz ? "Ulashish" : "Поделиться"}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted-foreground transition-all hover:bg-white/10 hover:text-foreground"
+            >
               <Share2 size={18} />
             </button>
             <button
@@ -502,19 +540,87 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
                   <p className="mb-4 sm:mb-6 text-sm font-bold text-amber-500">{t.mustAgreeAll}</p>
                 )}
                 {(terms.length === 0 || allAgreed) && <div className="mb-4 sm:mb-6" />}
-                <button
-                  onClick={handleSign}
-                  disabled={isLoading || !allAgreed}
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg font-black text-white shadow-xl transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    {isLoading ? t.signing : t.signButton}
-                    <CheckCircle2 size={22} />
-                  </span>
-                  <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
-                </button>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    onClick={handleSign}
+                    disabled={isLoading || !allAgreed}
+                    className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-8 sm:px-12 py-4 text-base font-black text-white shadow-xl transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      {isLoading ? t.signing : t.signButton}
+                      <CheckCircle2 size={20} />
+                    </span>
+                    <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
+                  </button>
+                  <button
+                    onClick={() => setShowRejectModal(true)}
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-8 py-4 text-base font-black text-red-500 transition-all hover:bg-red-500/20 active:scale-95"
+                  >
+                    <XCircle size={18} />
+                    {uz ? "Rad etish" : "Отклонить"}
+                  </button>
+                </div>
               </motion.div>
             )}
+
+            {/* Reject modal */}
+            <AnimatePresence>
+              {showRejectModal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                  onClick={(e) => { if (e.target === e.currentTarget) setShowRejectModal(false); }}
+                >
+                  <motion.div
+                    initial={{ scale: 0.95, y: 16 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.95, y: 16 }}
+                    className="w-full max-w-md rounded-3xl border border-white/10 bg-background/95 backdrop-blur-2xl p-6 shadow-2xl"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-black text-foreground">
+                        {uz ? "Shartnomani rad etish" : "Отклонить договор"}
+                      </h3>
+                      <button
+                        onClick={() => setShowRejectModal(false)}
+                        className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {uz ? "Rad etish sababini kiriting (ixtiyoriy):" : "Укажите причину отклонения (необязательно):"}
+                    </p>
+                    <textarea
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder={uz ? "Masalan: Shartlar menga mos kelmadi..." : "Например: Условия мне не подходят..."}
+                      rows={3}
+                      className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/40 mb-4"
+                    />
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleReject}
+                        disabled={rejectLoading}
+                        className="flex-1 rounded-2xl bg-red-500 py-3 text-sm font-black text-white transition-all hover:bg-red-600 active:scale-95 disabled:opacity-50"
+                      >
+                        {rejectLoading
+                          ? (uz ? "Saqlanmoqda..." : "Сохраняется...")
+                          : (uz ? "Rad etishni tasdiqlash" : "Подтвердить отклонение")}
+                      </button>
+                      <button
+                        onClick={() => setShowRejectModal(false)}
+                        className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-muted-foreground hover:bg-white/10 transition-colors"
+                      >
+                        {uz ? "Bekor" : "Отмена"}
+                      </button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {contract.status === "SIGNED" && (
               <div className="mt-12 flex flex-col items-center gap-4 text-center opacity-40">
