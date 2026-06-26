@@ -71,17 +71,9 @@ export async function verifySmsCode(phone: string, code: string, userData: any) 
   try {
     const existing = await db.user.findUnique({ where: { phone } });
 
-    let user;
-    if (existing) {
-      user = await db.user.update({
-        where: { phone },
-        data: { name: userData.name },
-      });
-    } else {
-      user = await db.user.create({
-        data: { uid: generateUid(), name: userData.name, phone, pinfl: userData.pinfl },
-      });
-    }
+    const user = existing ?? await db.user.create({
+      data: { uid: generateUid(), name: userData.name, phone, pinfl: userData.pinfl },
+    });
 
     const cookieStore = await cookies();
     cookieStore.set("user_session", user.id, {
