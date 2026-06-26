@@ -42,6 +42,7 @@ export function NewContractClient({
     title: prefillTitle,
     amount: prefillAmount,
     recipientPhone: "",
+    recipientPinfl: "",
     content: prefillContent,
   });
   const [terms, setTerms] = useState<string[]>(prefillTerms);
@@ -204,23 +205,25 @@ export function NewContractClient({
                 </div>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
-                    {lang === "uz" ? "Sizning raqamingiz (Ijrochi)" : "Ваш номер (Исполнитель)"}
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute top-1/2 left-4 -translate-y-1/2 text-primary/50" size={18} />
-                    <input
-                      readOnly
-                      value={creatorPhone}
-                      className="w-full rounded-2xl border border-primary/20 bg-primary/5 py-4 pl-12 pr-4 text-sm font-black text-primary outline-none cursor-default"
-                    />
-                  </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
+                  {lang === "uz" ? "Sizning raqamingiz (Ijrochi)" : "Ваш номер (Исполнитель)"}
+                </label>
+                <div className="relative">
+                  <Phone className="absolute top-1/2 left-4 -translate-y-1/2 text-primary/50" size={18} />
+                  <input
+                    readOnly
+                    value={creatorPhone}
+                    className="w-full rounded-2xl border border-primary/20 bg-primary/5 py-4 pl-12 pr-4 text-sm font-black text-primary outline-none cursor-default"
+                  />
                 </div>
+              </div>
 
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="group space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">{t.phoneLabel}</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
+                    {lang === "uz" ? "Mijoz telefon raqami" : "Телефон получателя"}
+                  </label>
                   <div className="relative">
                     <Phone className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={18} />
                     <input
@@ -228,12 +231,32 @@ export function NewContractClient({
                       type="tel"
                       value={formData.recipientPhone}
                       onChange={handleChange}
-                      placeholder="+998 90 123 45 67 (ixtiyoriy)"
+                      placeholder="+998 90 123 45 67"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/10 focus:ring-4 focus:ring-primary/10"
+                    />
+                  </div>
+                </div>
+                <div className="group space-y-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
+                    {lang === "uz" ? "Mijoz JShShIR (PINFL)" : "ПИНФЛ получателя"}
+                  </label>
+                  <div className="relative">
+                    <FileText className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={18} />
+                    <input
+                      name="recipientPinfl"
+                      type="text"
+                      value={formData.recipientPinfl}
+                      onChange={handleChange}
+                      maxLength={14}
+                      placeholder="12345678901234"
                       className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/10 focus:ring-4 focus:ring-primary/10"
                     />
                   </div>
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground/50 -mt-2 ml-1">
+                {lang === "uz" ? "Telefon yoki JShShIR — biri kiritilsa shartnoma avtomatik yuboriladi" : "Телефон или ПИНФЛ — если заполнено, договор отправится автоматически"}
+              </p>
 
               <div className="group space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">{t.contentLabel}</label>

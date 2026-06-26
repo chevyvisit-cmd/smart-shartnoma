@@ -115,7 +115,8 @@ export async function createContract(formData: FormData) {
   const amountInput  = formData.get("amount");
   const amount       = amountInput ? parseFloat(amountInput as string) : 0;
   const content      = formData.get("content") as string;
-  const recipientPhone = formData.get("recipientPhone") as string;
+  const recipientPhone = (formData.get("recipientPhone") as string)?.trim() || null;
+  const recipientPinfl = (formData.get("recipientPinfl") as string)?.trim() || null;
   const termsRaw     = formData.get("terms") as string;
 
   const user = await getUser();
@@ -123,11 +124,16 @@ export async function createContract(formData: FormData) {
 
   const recipient = recipientPhone
     ? await db.user.findFirst({ where: { phone: recipientPhone } })
+    : recipientPinfl
+    ? await db.user.findFirst({ where: { pinfl: recipientPinfl } })
     : null;
+
+  if ((recipientPhone || recipientPinfl) && !recipient) {
+    return { error: "Mijoz topilmadi. Avval ro'yxatdan o'tishi kerak." };
+  }
 
   try {
     await db.$transaction(async (tx) => {
-      // Tranzaksiya ichida frеsh ma'lumot o'qib kvotani tekshiramiz
       const fresh = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
       const quota = checkQuota(fresh.freeContractsUsed, fresh.paidContractCredits);
 
@@ -140,7 +146,10 @@ export async function createContract(formData: FormData) {
           terms: termsRaw || "[]",
           creatorId: user.id,
           recipientId: recipient?.id ?? null,
-          status: "PENDING",
+          recipientPhone: recipientPhone,
+          recipientPinfl: recipientPinfl,
+          status: recipient ? "SENT" : "PENDING",
+          sentAt: recipient ? new Date() : null,
         },
       });
 
@@ -233,7 +242,10 @@ export async function getPendingContracts() {
 
   return db.contract.findMany({
     where: { recipientId: user.id, status: "SENT" },
-    include: { creator: { select: { id: true, name: true, phone: true } } },
+    select: {
+      id: true, cid: true, title: true, amount: true, content: true, terms: true, sentAt: true,
+      creator: { select: { id: true, name: true, phone: true } },
+    },
     orderBy: { sentAt: "desc" },
   });
 }
