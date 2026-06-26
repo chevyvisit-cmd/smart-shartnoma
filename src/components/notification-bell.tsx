@@ -36,7 +36,8 @@ export function NotificationBell({
   const [activeContract, setActiveContract] = useState<PendingContract | null>(null);
   const [checkedTerms, setCheckedTerms] = useState<boolean[]>([]);
   const [rejectReason, setRejectReason] = useState("");
-  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [inlineError, setInlineError] = useState<string | null>(null);
 
   const count = pendingContracts.length;
 
@@ -62,29 +63,41 @@ export function NotificationBell({
 
   const handleAccept = async () => {
     if (!activeContract) return;
-    setLoadingId(activeContract.id);
-    const result = await acceptSentContract(activeContract.id);
-    setLoadingId(null);
-    if (result.error) {
-      alert(result.error);
-    } else {
-      setOpen(false);
-      backToList();
-      router.refresh();
+    setLoading(true);
+    setInlineError(null);
+    try {
+      const result = await acceptSentContract(activeContract.id);
+      if ("error" in result && result.error) {
+        setInlineError(result.error);
+      } else {
+        setOpen(false);
+        backToList();
+        router.refresh();
+      }
+    } catch (e) {
+      setInlineError(uz ? "Xatolik yuz berdi. Qayta urinib ko'ring." : "Произошла ошибка. Попробуйте снова.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleReject = async () => {
     if (!activeContract) return;
-    setLoadingId(activeContract.id);
-    const result = await rejectContract(activeContract.id, rejectReason || undefined);
-    setLoadingId(null);
-    if (result.error) {
-      alert(result.error);
-    } else {
-      setOpen(false);
-      backToList();
-      router.refresh();
+    setLoading(true);
+    setInlineError(null);
+    try {
+      const result = await rejectContract(activeContract.id, rejectReason || undefined);
+      if ("error" in result && result.error) {
+        setInlineError(result.error);
+      } else {
+        setOpen(false);
+        backToList();
+        router.refresh();
+      }
+    } catch (e) {
+      setInlineError(uz ? "Xatolik yuz berdi." : "Произошла ошибка.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -281,13 +294,16 @@ export function NotificationBell({
                             : `Подтверждено ${checkedTerms.filter(Boolean).length}/${checkedTerms.length} условий`}
                         </p>
                       )}
+                      {inlineError && (
+                        <p className="text-center text-[11px] text-red-400 font-bold">{inlineError}</p>
+                      )}
                       <button
                         onClick={handleAccept}
-                        disabled={!allTermsChecked || loadingId === activeContract.id}
+                        disabled={!allTermsChecked || loading}
                         className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-black text-white transition-all hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Check size={16} />
-                        {loadingId === activeContract.id
+                        {loading
                           ? (uz ? "Saqlanmoqda..." : "Сохраняется...")
                           : (uz ? "Tasdiqlash va qabul qilish" : "Подтвердить и принять")}
                       </button>
@@ -315,12 +331,15 @@ export function NotificationBell({
                       className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/40"
                     />
                     <div className="flex gap-2">
+                      {inlineError && (
+                        <p className="col-span-2 text-center text-[11px] text-red-400 font-bold">{inlineError}</p>
+                      )}
                       <button
                         onClick={handleReject}
-                        disabled={loadingId === activeContract.id}
+                        disabled={loading}
                         className="flex-1 rounded-xl bg-red-500/10 py-2.5 text-xs font-black text-red-500 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                       >
-                        {loadingId === activeContract.id ? t.rejecting : t.rejectConfirm}
+                        {loading ? t.rejecting : t.rejectConfirm}
                       </button>
                       <button
                         onClick={backToList}
