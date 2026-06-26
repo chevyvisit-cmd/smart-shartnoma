@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, X, Check, Eye, XCircle, FileText, CheckSquare, Square, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -29,6 +30,7 @@ export function NotificationBell({
 }) {
   const t = translations[lang].notifications;
   const uz = lang === "uz";
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [viewState, setViewState] = useState<ViewState>("list");
   const [activeContract, setActiveContract] = useState<PendingContract | null>(null);
@@ -66,8 +68,9 @@ export function NotificationBell({
     if (result.error) {
       alert(result.error);
     } else {
+      setOpen(false);
       backToList();
-      if (pendingContracts.length <= 1) setOpen(false);
+      router.refresh();
     }
   };
 
@@ -79,8 +82,9 @@ export function NotificationBell({
     if (result.error) {
       alert(result.error);
     } else {
+      setOpen(false);
       backToList();
-      if (pendingContracts.length <= 1) setOpen(false);
+      router.refresh();
     }
   };
 

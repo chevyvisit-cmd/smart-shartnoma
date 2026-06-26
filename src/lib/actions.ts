@@ -264,8 +264,7 @@ export async function acceptSentContract(contractId: string) {
     data: { status: "ACCEPTED", acceptedAt: new Date() },
   });
 
-  revalidatePath("/dashboard");
-  revalidatePath(`/contracts/${contractId}`);
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -283,8 +282,7 @@ export async function rejectContract(contractId: string, reason?: string) {
     data: { status: "REJECTED", rejectedAt: new Date(), rejectionReason: reason || null },
   });
 
-  revalidatePath("/dashboard");
-  revalidatePath(`/contracts/${contractId}`);
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
