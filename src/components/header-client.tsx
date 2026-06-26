@@ -21,7 +21,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
         className="fixed top-4 left-0 right-0 z-50 px-4 md:px-8"
       >
         <div className="mx-auto max-w-7xl">
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-background/40 backdrop-blur-xl shadow-2xl transition-all duration-300 hover:border-primary/30">
+          <div className="relative rounded-2xl border border-white/10 bg-background/40 backdrop-blur-xl shadow-2xl transition-all duration-300 hover:border-primary/30">
             <div className="container mx-auto flex h-16 items-center justify-between px-6">
               <div className="flex items-center gap-2">
                 <Link href="/" className="group flex items-center gap-2">
