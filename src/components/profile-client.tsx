@@ -9,6 +9,7 @@ import { Language, translations } from "@/lib/translations";
 export function ProfileClient({ user, contracts, lang }: { user: any, contracts: any[], lang: Language }) {
   const t  = translations[lang].profile;
   const ct = translations[lang].dashboard;
+  const uz = lang === "uz";
 
   const [imgUrl, setImgUrl]       = useState(user.image || "");
   const [isUpdatingImg, setUpdImg] = useState(false);
@@ -233,9 +234,16 @@ export function ProfileClient({ user, contracts, lang }: { user: any, contracts:
                         <div className="hidden sm:block text-right">
                           <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">Status</p>
                           <p className={`text-xs font-black uppercase ${
-                            contract.status === "SIGNED" ? "text-emerald-500" : "text-amber-500"
+                            contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "text-emerald-500"
+                            : contract.status === "REJECTED" ? "text-red-500"
+                            : contract.status === "SENT" ? "text-blue-400"
+                            : "text-amber-500"
                           }`}>
-                            {contract.status === "SIGNED" ? ct.stats.signed : ct.stats.pending}
+                            {contract.status === "ACCEPTED" ? (uz ? "Qabul qilindi" : "Принято")
+                              : contract.status === "SIGNED"   ? ct.stats.signed
+                              : contract.status === "REJECTED" ? (uz ? "Rad etildi" : "Отклонено")
+                              : contract.status === "SENT"     ? (uz ? "Yuborildi"  : "Отправлено")
+                              : ct.stats.pending}
                           </p>
                         </div>
                         {contract.status === "SIGNED"

@@ -14,6 +14,7 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
   lang: Language;
 }) {
   const t = translations[lang].dashboard;
+  const ct = translations[lang].contracts;
   const uz = lang === "uz";
 
   const statItems = [
@@ -199,12 +200,22 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
                     </td>
                     <td className="px-8 py-6">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-tighter ${
-                        contract.status === "SIGNED" 
-                        ? "bg-emerald-500/10 text-emerald-500" 
+                        contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500/10 text-emerald-500"
+                        : contract.status === "REJECTED" ? "bg-red-500/10 text-red-500"
+                        : contract.status === "SENT" ? "bg-blue-500/10 text-blue-500"
                         : "bg-amber-500/10 text-amber-500"
                       }`}>
-                        <div className={`h-1.5 w-1.5 rounded-full ${contract.status === "SIGNED" ? "bg-emerald-500" : "bg-amber-500"}`} />
-                        {contract.status === "SIGNED" ? t.stats.signed : t.stats.pending}
+                        <div className={`h-1.5 w-1.5 rounded-full ${
+                          contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500"
+                          : contract.status === "REJECTED" ? "bg-red-500"
+                          : contract.status === "SENT" ? "bg-blue-500"
+                          : "bg-amber-500"
+                        }`} />
+                        {contract.status === "ACCEPTED" ? (uz ? "Qabul qilindi" : "Принято")
+                          : contract.status === "SIGNED"   ? t.stats.signed
+                          : contract.status === "REJECTED" ? (uz ? "Rad etildi"   : "Отклонено")
+                          : contract.status === "SENT"     ? (uz ? "Yuborildi"    : "Отправлено")
+                          : t.stats.pending}
                       </span>
                     </td>
                   </tr>

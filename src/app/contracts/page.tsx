@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { getUser, getLanguage } from "@/lib/actions";
 import { redirect } from "next/navigation";
-import { FileText, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { FileText, CheckCircle2, Clock, ArrowRight, XCircle, Send } from "lucide-react";
 import Link from "next/link";
 
 export default async function ContractsPage() {
@@ -18,8 +18,11 @@ export default async function ContractsPage() {
     include: { creator: true, recipient: true },
   });
 
-  const signed   = lang === "uz" ? "Imzolangan"  : "Подписано";
-  const pending  = lang === "uz" ? "Kutilmoqda"  : "Ожидает";
+  const signed   = lang === "uz" ? "Imzolangan"   : "Подписано";
+  const accepted = lang === "uz" ? "Qabul qilindi": "Принято";
+  const rejected = lang === "uz" ? "Rad etildi"   : "Отклонено";
+  const sent     = lang === "uz" ? "Yuborildi"    : "Отправлено";
+  const pending  = lang === "uz" ? "Kutilmoqda"   : "Ожидает";
   const empty    = lang === "uz" ? "Hali shartnomalar yo'q." : "Контрактов пока нет.";
   const title    = lang === "uz" ? "Mening shartnomalarim" : "Мои контракты";
   const newLabel = lang === "uz" ? "Yangi shartnoma" : "Новый контракт";
@@ -69,14 +72,16 @@ export default async function ContractsPage() {
 
               <div className="flex items-center gap-4">
                 <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-tight ${
-                  contract.status === "SIGNED"
-                    ? "bg-emerald-500/10 text-emerald-500"
-                    : "bg-amber-500/10 text-amber-500"
+                  contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500/10 text-emerald-500"
+                  : contract.status === "REJECTED" ? "bg-red-500/10 text-red-500"
+                  : contract.status === "SENT" ? "bg-blue-500/10 text-blue-500"
+                  : "bg-amber-500/10 text-amber-500"
                 }`}>
-                  {contract.status === "SIGNED"
-                    ? <><CheckCircle2 size={12} /> {signed}</>
-                    : <><Clock size={12} /> {pending}</>
-                  }
+                  {contract.status === "ACCEPTED" ? <><CheckCircle2 size={12} /> {accepted}</>
+                  : contract.status === "SIGNED"   ? <><CheckCircle2 size={12} /> {signed}</>
+                  : contract.status === "REJECTED" ? <><XCircle size={12} /> {rejected}</>
+                  : contract.status === "SENT"     ? <><Send size={12} /> {sent}</>
+                  : <><Clock size={12} /> {pending}</>}
                 </span>
                 <span className="hidden sm:flex items-center gap-1 text-xs font-black text-muted-foreground/40 group-hover:text-primary transition-colors uppercase tracking-widest">
                   {viewLabel} <ArrowRight size={12} />
