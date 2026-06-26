@@ -116,7 +116,7 @@ export function NewContractClient({
 
   return (
     <>
-    <div className="relative min-h-screen pt-24 pb-20 px-4 md:px-8">
+    <div className="relative min-h-screen pt-20 pb-16 px-4 md:px-8">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="mx-auto max-w-6xl">
@@ -164,11 +164,11 @@ export function NewContractClient({
             animate={{ opacity: 1 }}
             className="rounded-[32px] border border-white/10 bg-background/40 p-4 sm:p-8 backdrop-blur-2xl shadow-2xl md:p-10"
           >
-            <div className="mb-8">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
-                <FileSignature size={28} />
+            <div className="mb-6 sm:mb-8">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3 sm:mb-4">
+                <FileSignature size={24} />
               </div>
-              <h1 className="text-3xl font-black tracking-tight">{t.newTitle}</h1>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{t.newTitle}</h1>
               <p className="mt-2 text-muted-foreground font-medium">{lang === 'uz' ? "Barcha zaruriy ma'lumotlarni kiriting." : "Введите все необходимые данные."}</p>
             </div>
 

@@ -14,7 +14,6 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
   lang: Language;
 }) {
   const t = translations[lang].dashboard;
-  const ct = translations[lang].contracts;
   const uz = lang === "uz";
 
   const statItems = [
@@ -25,19 +24,19 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-24 md:px-6">
-      <motion.div 
+    <div className="container mx-auto px-4 py-20 md:px-6">
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col justify-between gap-6 md:flex-row md:items-center"
+        className="flex flex-col justify-between gap-4 md:flex-row md:items-center"
       >
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-foreground">{t.title}</h1>
-          <p className="mt-1 text-muted-foreground font-medium">{t.welcome}</p>
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground">{t.title}</h1>
+          <p className="mt-1 text-sm sm:text-base text-muted-foreground font-medium">{t.welcome}</p>
         </div>
         <Link
           href="/contracts/new"
-          className="group relative flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-6 py-4 font-black text-white shadow-xl transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95"
+          className="group relative flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-5 py-3 sm:px-6 sm:py-4 text-sm font-black text-white shadow-xl transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95 self-start md:self-auto"
         >
           <span className="relative z-10 flex items-center gap-2 font-black">
             <Plus size={20} /> {t.newContract}
@@ -116,22 +115,22 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
       )}
 
       {/* Stats Grid */}
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
         {statItems.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all hover:border-primary/30"
+            className="group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-md transition-all hover:border-primary/30"
           >
             <div className="flex items-center justify-between">
-              <div className={`rounded-2xl ${stat.bg} ${stat.color} p-4 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+              <div className={`rounded-xl sm:rounded-2xl ${stat.bg} ${stat.color} p-3 sm:p-4 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
                 {stat.icon}
               </div>
-              <span className="text-3xl font-black">{stat.value}</span>
+              <span className="text-2xl sm:text-3xl font-black">{stat.value}</span>
             </div>
-            <p className="mt-6 text-sm font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+            <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
             <div className={`absolute -bottom-4 -right-4 h-16 w-16 rounded-full blur-2xl opacity-10 transition-opacity group-hover:opacity-20 ${stat.bg}`} />
           </motion.div>
         ))}
@@ -144,9 +143,9 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
         transition={{ delay: 0.4 }}
         className="mt-12 overflow-hidden rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl"
       >
-        <div className="flex flex-col justify-between gap-4 border-b border-white/10 p-8 sm:flex-row sm:items-center">
-          <h3 className="text-2xl font-black">{t.table.recent}</h3>
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col justify-between gap-3 border-b border-white/10 p-4 sm:p-8 sm:flex-row sm:items-center">
+          <h3 className="text-lg sm:text-2xl font-black">{t.table.recent}</h3>
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="relative">
               <Search className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground" size={18} />
               <input 
