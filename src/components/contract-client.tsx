@@ -249,7 +249,7 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
               : commonT.stats.pending;
             const Icon = isSigned || isAccepted ? CheckCircle2 : isRejected ? XCircle : isSent ? Send : Clock;
             return (
-              <div className={`flex items-center justify-between px-8 py-6 md:px-12 ${bgClass}`}>
+              <div className={`flex items-center justify-between px-4 py-4 sm:px-8 sm:py-6 md:px-12 ${bgClass}`}>
                 <div className="flex items-center gap-3">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full text-white ${iconBg} ${!isSigned && !isAccepted && !isRejected ? "animate-pulse" : ""}`}>
                     <Icon size={20} />
@@ -267,14 +267,14 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
             );
           })()}
 
-          <div className="p-8 md:p-12">
-            <div className="mb-12">
+          <div className="p-4 sm:p-8 md:p-12">
+            <div className="mb-8 sm:mb-12">
               {contract.cid && (
                 <p className="mb-3 text-xs font-black tracking-widest text-primary/50 uppercase">{contract.cid}</p>
               )}
-              <h1 className="text-4xl font-black tracking-tight text-foreground md:text-5xl">{contract.title}</h1>
-              <div className="mt-6 flex items-center gap-3 text-3xl font-black text-primary">
-                <DollarSign size={32} />
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-foreground">{contract.title}</h1>
+              <div className="mt-4 sm:mt-6 flex items-center gap-3 text-xl sm:text-3xl font-black text-primary">
+                <DollarSign size={24} className="sm:hidden" /><DollarSign size={32} className="hidden sm:block" />
                 <span>{(contract.amount || 0).toLocaleString()} UZS</span>
               </div>
             </div>
@@ -429,7 +429,7 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
 
             <div className="mb-12">
               <p className="mb-6 text-xs font-black uppercase tracking-widest text-muted-foreground/60">{t.contentLabel}</p>
-              <div className="rounded-3xl border border-white/5 bg-white/5 p-8">
+              <div className="rounded-3xl border border-white/5 bg-white/5 p-4 sm:p-8">
                 <p className="whitespace-pre-wrap leading-relaxed text-foreground/80 font-medium">
                   {contract.content}
                 </p>
@@ -493,19 +493,19 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="mt-12 rounded-[32px] bg-primary/5 p-8 text-center border border-primary/20"
+                className="mt-8 sm:mt-12 rounded-3xl bg-primary/5 p-5 sm:p-8 text-center border border-primary/20"
               >
-                <ShieldCheck size={48} className="mx-auto mb-4 text-primary" />
-                <h3 className="text-2xl font-black mb-2">{t.signTitle}</h3>
-                <p className="mb-2 text-muted-foreground font-medium">{t.signDesc}</p>
+                <ShieldCheck size={40} className="mx-auto mb-3 text-primary" />
+                <h3 className="text-xl sm:text-2xl font-black mb-2">{t.signTitle}</h3>
+                <p className="mb-2 text-sm sm:text-base text-muted-foreground font-medium">{t.signDesc}</p>
                 {terms.length > 0 && !allAgreed && (
-                  <p className="mb-6 text-sm font-bold text-amber-500">{t.mustAgreeAll}</p>
+                  <p className="mb-4 sm:mb-6 text-sm font-bold text-amber-500">{t.mustAgreeAll}</p>
                 )}
-                {(terms.length === 0 || allAgreed) && <div className="mb-6" />}
+                {(terms.length === 0 || allAgreed) && <div className="mb-4 sm:mb-6" />}
                 <button
                   onClick={handleSign}
                   disabled={isLoading || !allAgreed}
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-12 py-5 text-lg font-black text-white shadow-xl transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-8 sm:px-12 py-4 sm:py-5 text-base sm:text-lg font-black text-white shadow-xl transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     {isLoading ? t.signing : t.signButton}

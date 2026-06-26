@@ -55,7 +55,7 @@ export function ProfileClient({ user, contracts, lang }: { user: any, contracts:
 
           {/* Sidebar */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="lg:col-span-1 space-y-6">
-            <div className="rounded-[40px] border border-white/10 bg-background/40 p-8 backdrop-blur-2xl shadow-2xl text-center relative overflow-hidden">
+            <div className="rounded-[40px] border border-white/10 bg-background/40 p-5 sm:p-8 backdrop-blur-2xl shadow-2xl text-center relative overflow-hidden">
 
               {/* Avatar */}
               <div className="relative mx-auto mb-6 h-32 w-32">
@@ -210,7 +210,7 @@ export function ProfileClient({ user, contracts, lang }: { user: any, contracts:
                       key={contract.id}
                       whileHover={{ x: 5 }}
                       onClick={() => window.location.href = `/contracts/${contract.id}`}
-                      className="group cursor-pointer flex items-center justify-between rounded-3xl border border-white/5 bg-white/5 p-6 transition-all hover:border-primary/30 hover:bg-white/10"
+                      className="group cursor-pointer flex items-center justify-between rounded-3xl border border-white/5 bg-white/5 p-4 sm:p-6 transition-all hover:border-primary/30 hover:bg-white/10"
                     >
                       <div className="flex items-center gap-4">
                         <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
@@ -231,7 +231,7 @@ export function ProfileClient({ user, contracts, lang }: { user: any, contracts:
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="hidden sm:block text-right">
+                        <div className="text-right">
                           <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">Status</p>
                           <p className={`text-xs font-black uppercase ${
                             contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "text-emerald-500"

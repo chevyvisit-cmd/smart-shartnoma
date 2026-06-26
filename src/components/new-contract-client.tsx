@@ -162,7 +162,7 @@ export function NewContractClient({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="rounded-[32px] border border-white/10 bg-background/40 p-8 backdrop-blur-2xl shadow-2xl md:p-10"
+            className="rounded-[32px] border border-white/10 bg-background/40 p-4 sm:p-8 backdrop-blur-2xl shadow-2xl md:p-10"
           >
             <div className="mb-8">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">

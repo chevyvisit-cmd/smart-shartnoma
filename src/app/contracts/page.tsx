@@ -29,12 +29,12 @@ export default async function ContractsPage() {
   const viewLabel= lang === "uz" ? "Ko'rish" : "Просмотр";
 
   return (
-    <div className="container mx-auto px-4 py-24 md:px-6">
-      <div className="flex items-center justify-between mb-12">
-        <h1 className="text-4xl font-black tracking-tight">{title}</h1>
+    <div className="container mx-auto px-4 py-20 md:px-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
+        <h1 className="text-2xl sm:text-4xl font-black tracking-tight">{title}</h1>
         <Link
           href="/contracts/new"
-          className="group relative flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-6 py-3 text-sm font-black text-white shadow-xl transition-all hover:scale-105 active:scale-95"
+          className="group relative flex items-center gap-2 overflow-hidden rounded-2xl bg-primary px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-black text-white shadow-xl transition-all hover:scale-105 active:scale-95 self-start sm:self-auto"
         >
           <span className="relative z-10">{newLabel}</span>
           <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
@@ -43,7 +43,7 @@ export default async function ContractsPage() {
 
       <div className="grid gap-4">
         {contracts.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-20 text-center text-muted-foreground">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-20 text-center text-muted-foreground">
             <FileText size={48} className="mx-auto mb-4 opacity-20" />
             <p className="font-bold">{empty}</p>
             <Link href="/contracts/new" className="mt-4 inline-block text-sm font-black text-primary hover:underline">
@@ -55,7 +55,7 @@ export default async function ContractsPage() {
             <Link
               key={contract.id}
               href={`/contracts/${contract.id}`}
-              className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all hover:border-primary/30 hover:bg-white/10"
+              className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 backdrop-blur-md transition-all hover:border-primary/30 hover:bg-white/10"
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">

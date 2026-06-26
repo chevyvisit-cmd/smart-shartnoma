@@ -59,7 +59,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-20">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:py-20">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
@@ -67,8 +67,8 @@ export function RegisterClient({ lang }: { lang: Language }) {
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-lg overflow-hidden rounded-[32px] border border-white/10 bg-background/40 backdrop-blur-2xl shadow-2xl"
       >
-        <div className="p-8 md:p-12">
-          <div className="mb-10 text-center">
+        <div className="p-5 sm:p-8 md:p-12">
+          <div className="mb-8 sm:mb-10 text-center">
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -76,7 +76,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
             >
               {step === 1 ? <User size={32} /> : <ShieldCheck size={32} />}
             </motion.div>
-            <h2 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground md:text-4xl">
               {step === 1 ? t.registerTitle : t.verifyTitle}
             </h2>
             <p className="mt-3 text-muted-foreground">

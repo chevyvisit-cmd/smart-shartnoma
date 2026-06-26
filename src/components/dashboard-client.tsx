@@ -160,33 +160,73 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          {contracts.length === 0 ? (
-            <div className="py-20 text-center text-muted-foreground">
-              <FileText size={48} className="mx-auto mb-4 opacity-20" />
-              <p className="font-bold">{t.table.empty}</p>
-              <Link href="/contracts/new" className="mt-4 inline-block text-primary hover:underline font-bold">
-                {t.newContract}
-              </Link>
+        {contracts.length === 0 ? (
+          <div className="py-12 sm:py-20 text-center text-muted-foreground">
+            <FileText size={48} className="mx-auto mb-4 opacity-20" />
+            <p className="font-bold">{t.table.empty}</p>
+            <Link href="/contracts/new" className="mt-4 inline-block text-primary hover:underline font-bold">
+              {t.newContract}
+            </Link>
+          </div>
+        ) : (
+          <>
+            {/* Mobile cards */}
+            <div className="md:hidden divide-y divide-white/5">
+              {contracts.map((contract) => (
+                <Link
+                  key={contract.id}
+                  href={`/contracts/${contract.id}`}
+                  className="flex items-center justify-between px-4 py-4 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <FileText size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-black text-sm truncate">{contract.title}</p>
+                      <p className="text-xs text-primary font-bold">{(contract.amount || 0).toLocaleString()} UZS</p>
+                    </div>
+                  </div>
+                  <span className={`ml-2 shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black uppercase ${
+                    contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500/10 text-emerald-500"
+                    : contract.status === "REJECTED" ? "bg-red-500/10 text-red-500"
+                    : contract.status === "SENT" ? "bg-blue-500/10 text-blue-500"
+                    : "bg-amber-500/10 text-amber-500"
+                  }`}>
+                    <div className={`h-1.5 w-1.5 rounded-full ${
+                      contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500"
+                      : contract.status === "REJECTED" ? "bg-red-500"
+                      : contract.status === "SENT" ? "bg-blue-500" : "bg-amber-500"
+                    }`} />
+                    {contract.status === "ACCEPTED" ? (uz ? "Qabul" : "Принято")
+                      : contract.status === "SIGNED"   ? (uz ? "Imzo" : "Подпис.")
+                      : contract.status === "REJECTED" ? (uz ? "Rad"  : "Откл.")
+                      : contract.status === "SENT"     ? (uz ? "Yuborildi" : "Отпр.")
+                      : (uz ? "Kutilmoqda" : "Ожидает")}
+                  </span>
+                </Link>
+              ))}
             </div>
-          ) : (
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
-                  <th className="px-8 py-6">{t.table.name}</th>
-                  <th className="px-8 py-6">{t.table.amount}</th>
-                  <th className="px-8 py-6">{t.table.date}</th>
-                  <th className="px-8 py-6">{t.table.status}</th>
+                  <th className="px-6 py-5">{t.table.name}</th>
+                  <th className="px-6 py-5">{t.table.amount}</th>
+                  <th className="px-6 py-5">{t.table.date}</th>
+                  <th className="px-6 py-5">{t.table.status}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {contracts.map((contract) => (
-                  <tr 
-                    key={contract.id} 
+                  <tr
+                    key={contract.id}
                     className="group cursor-pointer transition-all hover:bg-white/5"
                     onClick={() => window.location.href = `/contracts/${contract.id}`}
                   >
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                           <FileText size={18} />
@@ -194,11 +234,11 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
                         <span className="font-bold group-hover:text-primary transition-colors">{contract.title}</span>
                       </div>
                     </td>
-                    <td className="px-8 py-6 font-black text-primary">{(contract.amount || 0).toLocaleString()} UZS</td>
-                    <td className="px-8 py-6 text-sm font-medium text-muted-foreground">
+                    <td className="px-6 py-5 font-black text-primary">{(contract.amount || 0).toLocaleString()} UZS</td>
+                    <td className="px-6 py-5 text-sm font-medium text-muted-foreground">
                       {new Date(contract.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-5">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-tighter ${
                         contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500/10 text-emerald-500"
                         : contract.status === "REJECTED" ? "bg-red-500/10 text-red-500"
@@ -208,8 +248,7 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
                         <div className={`h-1.5 w-1.5 rounded-full ${
                           contract.status === "ACCEPTED" || contract.status === "SIGNED" ? "bg-emerald-500"
                           : contract.status === "REJECTED" ? "bg-red-500"
-                          : contract.status === "SENT" ? "bg-blue-500"
-                          : "bg-amber-500"
+                          : contract.status === "SENT" ? "bg-blue-500" : "bg-amber-500"
                         }`} />
                         {contract.status === "ACCEPTED" ? (uz ? "Qabul qilindi" : "Принято")
                           : contract.status === "SIGNED"   ? t.stats.signed
@@ -222,9 +261,10 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-        
+            </div>
+          </>
+        )}
+
         {contracts.length > 0 && (
           <div className="border-t border-white/10 p-6 text-center">
             <button className="text-sm font-black uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary">
