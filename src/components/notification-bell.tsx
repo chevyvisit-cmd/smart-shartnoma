@@ -145,12 +145,13 @@ export function NotificationBell({
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
 
+            {/* Mobile: full-screen bottom sheet. Desktop: dropdown */}
             <motion.div
               initial={{ opacity: 0, y: 8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.96 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-12 z-50 w-[calc(100vw-24px)] max-w-sm sm:w-80 overflow-hidden rounded-2xl border border-white/10 bg-background/95 backdrop-blur-2xl shadow-2xl"
+              className="fixed inset-x-3 bottom-3 z-50 sm:absolute sm:inset-auto sm:right-0 sm:bottom-auto sm:top-12 sm:w-80 overflow-hidden rounded-2xl border border-white/10 bg-background/95 backdrop-blur-2xl shadow-2xl"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">

@@ -12,7 +12,7 @@ class PaymentRequiredError extends Error {
   constructor() { super("payment_required"); }
 }
 
-// Normalize Uzbekistan phone numbers to "998XXXXXXXXX" (12 digits, no +)
+// Normalize to "998XXXXXXXXX" (12 digits, no +)
 // Handles: +998XXXXXXXXX, 998XXXXXXXXX, 0XXXXXXXXX, XXXXXXXXX
 function normalizePhone(raw: string): string {
   const d = raw.replace(/\D/g, "");
@@ -20,6 +20,14 @@ function normalizePhone(raw: string): string {
   if (d.startsWith("0") && d.length === 10) return "998" + d.slice(1);
   if (d.length === 9) return "998" + d;
   return d;
+}
+
+// Search by phone covering old (+998...) and new (998...) DB formats
+async function findUserByPhone(phone: string) {
+  const n = normalizePhone(phone);
+  return db.user.findFirst({
+    where: { OR: [{ phone: n }, { phone: "+" + n }, { phone: phone.trim() }] },
+  });
 }
 
 // Temporary in-memory storage for codes
@@ -81,7 +89,7 @@ export async function verifySmsCode(phone: string, code: string, userData: any) 
   verificationCodes.delete(normalized);
 
   try {
-    const existing = await db.user.findUnique({ where: { phone: normalized } });
+    const existing = await findUserByPhone(normalized);
 
     const user = existing ?? await db.user.create({
       data: { uid: generateUid(), name: userData.name, phone: normalized, pinfl: userData.pinfl },
@@ -135,10 +143,8 @@ export async function createContract(formData: FormData) {
   const user = await getUser();
   if (!user) return { error: "Sessiya muddati tugagan. Iltimos, qayta kiring." };
 
-  const normalizedRecipientPhone = recipientPhone ? normalizePhone(recipientPhone) : null;
-
-  const recipient = normalizedRecipientPhone
-    ? await db.user.findFirst({ where: { phone: normalizedRecipientPhone } })
+  const recipient = recipientPhone
+    ? await findUserByPhone(recipientPhone)
     : recipientPinfl
     ? await db.user.findFirst({ where: { pinfl: recipientPinfl } })
     : null;
@@ -217,9 +223,8 @@ export async function sendContract(contractId: string, recipientPhone?: string, 
 
   if (!recipientPhone && !recipientPinfl) return { error: "Telefon raqami yoki JShShIR kiriting" };
 
-  const normalizedSendPhone = recipientPhone ? normalizePhone(recipientPhone) : null;
-  const recipient = normalizedSendPhone
-    ? await db.user.findUnique({ where: { phone: normalizedSendPhone } })
+  const recipient = recipientPhone
+    ? await findUserByPhone(recipientPhone)
     : await db.user.findUnique({ where: { pinfl: recipientPinfl! } });
 
   if (!recipient) return { error: "Foydalanuvchi topilmadi. Avval ro'yxatdan o'tishi kerak." };
