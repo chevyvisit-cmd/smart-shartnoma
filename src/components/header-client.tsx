@@ -9,7 +9,7 @@ import { User, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
 import { logout, setLanguage } from "@/lib/actions";
 import { Language, translations } from "@/lib/translations";
 
-export function HeaderClient({ user, lang, pendingContracts, recentUpdates }: { user: any, lang: Language, pendingContracts: any[], recentUpdates: any[] }) {
+export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang: Language, pendingContracts: any[] }) {
   const t = translations[lang].nav;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -72,7 +72,7 @@ export function HeaderClient({ user, lang, pendingContracts, recentUpdates }: { 
 
                 {user ? (
                   <>
-                    <NotificationBell pendingContracts={pendingContracts} recentUpdates={recentUpdates} lang={lang} />
+                    <NotificationBell pendingContracts={pendingContracts} lang={lang} />
                     <Link
                       href="/dashboard"
                       className="hidden sm:flex items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-xs font-bold text-foreground transition-all hover:bg-white/10"
