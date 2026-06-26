@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, CheckCircle2, Clock, DollarSign, User, ShieldCheck, Download, Share2, ListChecks, Send, Phone, CreditCard, XCircle, Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { acceptContract, sendContract } from "@/lib/actions";
+import { acceptSentContract, sendContract } from "@/lib/actions";
 import { Language, translations } from "@/lib/translations";
 
 export function ContractClient({ contract, currentUserId, lang }: { contract: any, currentUserId?: string, lang: Language }) {
@@ -173,7 +173,7 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
     if (!confirm(t.confirmSign)) return;
 
     setIsLoading(true);
-    const result = await acceptContract(contract.id);
+    const result = await acceptSentContract(contract.id);
     setIsLoading(false);
 
     if (result.error) {
