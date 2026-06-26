@@ -1,23 +1,22 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 function buildClient(): PrismaClient {
-  const dbUrl = process.env.DATABASE_URL ?? "";
+  const envUrl = process.env.DATABASE_URL ?? "";
 
-  if (dbUrl.startsWith("libsql://") || dbUrl.startsWith("wss://")) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { createClient } = require("@libsql/client");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { PrismaLibSql } = require("@prisma/adapter-libsql");
-    const libsql = createClient({ url: dbUrl, authToken: process.env.DATABASE_AUTH_TOKEN ?? "" });
-    return new PrismaClient({ adapter: new PrismaLibSql(libsql) });
+  let url: string;
+  let authToken = "";
+
+  if (envUrl.startsWith("libsql://") || envUrl.startsWith("wss://")) {
+    url = envUrl;
+    authToken = process.env.DATABASE_AUTH_TOKEN ?? "";
+  } else {
+    url = process.env.VERCEL ? "file:/tmp/dev.db" : "file:./dev.db";
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
-  const dbFile = process.env.VERCEL ? "/tmp/dev.db" : "./dev.db";
-  return new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: dbFile }) });
+  return new PrismaClient({ adapter: new PrismaLibSql({ url, authToken }) });
 }
 
 export const db = globalForPrisma.prisma ?? buildClient();
