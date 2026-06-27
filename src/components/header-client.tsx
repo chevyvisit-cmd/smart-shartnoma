@@ -21,7 +21,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
         className="fixed top-3 left-0 right-0 z-50 px-3 md:px-8"
       >
         <div className="mx-auto max-w-7xl">
-          <div className="relative rounded-2xl border border-white/10 bg-background/60 backdrop-blur-xl shadow-2xl">
+          <div className="relative rounded-2xl border dark:border-white/10 border-border/60 dark:bg-background/60 bg-background/80 backdrop-blur-xl shadow-2xl dark:shadow-black/40 shadow-black/10">
             <div className="flex h-14 items-center justify-between px-4 md:px-6">
 
               {/* Logo */}
@@ -54,7 +54,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
               {/* Right side */}
               <div className="flex items-center gap-1.5 md:gap-2">
                 {/* Language Switcher — desktop */}
-                <div className="hidden sm:flex items-center gap-1 rounded-xl bg-white/5 p-1 border border-white/5">
+                <div className="hidden sm:flex items-center gap-1 rounded-xl dark:bg-white/5 bg-black/5 p-1 border dark:border-white/5 border-border/40">
                   <button
                     onClick={() => setLanguage("uz")}
                     className={`px-2 py-1 text-[10px] font-black uppercase rounded-lg transition-all ${lang === "uz" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"}`}
@@ -76,14 +76,14 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
                     <NotificationBell pendingContracts={pendingContracts} lang={lang} />
                     <Link
                       href="/dashboard"
-                      className="hidden sm:flex items-center gap-1.5 rounded-xl bg-white/5 px-3 py-2 text-xs font-bold text-foreground transition-all hover:bg-white/10"
+                      className="hidden sm:flex items-center gap-1.5 rounded-xl dark:bg-white/5 bg-black/5 px-3 py-2 text-xs font-bold text-foreground transition-all dark:hover:bg-white/10 hover:bg-black/10"
                     >
                       <LayoutDashboard size={16} className="text-primary" />
                       <span className="hidden md:inline">{t.dashboard}</span>
                     </Link>
                     <Link
                       href="/profile"
-                      className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all hover:border-primary/50"
+                      className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center overflow-hidden rounded-xl border dark:border-white/10 border-border dark:bg-white/5 bg-black/5 transition-all hover:border-primary/50"
                     >
                       {user.image ? (
                         <img src={user.image} alt="Profile" className="h-full w-full object-cover" />
@@ -93,7 +93,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
                     </Link>
                     <button
                       onClick={() => logout()}
-                      className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500"
+                      className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl dark:bg-white/5 bg-black/5 text-muted-foreground transition-all hover:bg-red-500/10 hover:text-red-500"
                       title={t.logout}
                     >
                       <LogOut size={16} />
@@ -112,7 +112,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
                 {/* Hamburger — always visible on mobile */}
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-foreground transition-all hover:bg-white/10 md:hidden"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border dark:border-white/10 border-border dark:bg-white/5 bg-black/5 text-foreground transition-all dark:hover:bg-white/10 hover:bg-black/10 md:hidden"
                   aria-label="Menu"
                 >
                   {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}

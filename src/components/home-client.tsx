@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ArrowRight, ShieldCheck, Zap, FileText, Play, Scale, Banknote, ClipboardList, Handshake, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Language, translations } from "@/lib/translations";
@@ -19,6 +19,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
   const t = translations[lang].home;
   const [videoLang, setVideoLang] = useState<"uz" | "ru">(lang === "ru" ? "ru" : "uz");
   const [playing, setPlaying] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   return (
     <div className="relative min-h-screen">
@@ -203,16 +204,17 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
               </div>
 
               <div className="relative overflow-hidden rounded-[28px] border border-border bg-card shadow-2xl" style={{ aspectRatio: "16/9" }}>
-                {playing ? (
-                  <iframe
-                    key={videoLang}
-                    src={`https://www.youtube-nocookie.com/embed/${VIDEO_IDS[videoLang]}?autoplay=1&rel=0&modestbranding=1`}
-                    title={videoLang === "uz" ? "Shartnoma haqida video" : "Видео о контракте"}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 h-full w-full"
-                  />
-                ) : (
+                {/* iframe always mounted — src set directly in click handler to preserve user-gesture audio context */}
+                <iframe
+                  ref={iframeRef}
+                  src=""
+                  title={videoLang === "uz" ? "Shartnoma haqida video" : "Видео о контракте"}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className={`absolute inset-0 h-full w-full transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                />
+
+                {!playing && (
                   <div className="relative h-full w-full">
                     <img
                       src={`https://img.youtube.com/vi/${VIDEO_IDS[videoLang]}/maxresdefault.jpg`}
@@ -222,7 +224,12 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                       <button
-                        onClick={() => setPlaying(true)}
+                        onClick={() => {
+                          if (iframeRef.current) {
+                            iframeRef.current.src = `https://www.youtube-nocookie.com/embed/${VIDEO_IDS[videoLang]}?autoplay=1&rel=0&modestbranding=1`;
+                          }
+                          setPlaying(true);
+                        }}
                         className="group flex h-24 w-24 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:border-primary hover:bg-primary"
                       >
                         <Play size={38} className="ml-1.5 text-white transition-transform group-hover:scale-110" fill="currentColor" />
