@@ -2,14 +2,13 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ArrowRight, ShieldCheck, Zap, MousePointer2, Sparkles, FileText, Play, Scale, Banknote, ClipboardList, Handshake } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap, FileText, Play, Scale, Banknote, ClipboardList, Handshake, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Language, translations } from "@/lib/translations";
 
-// ✏️ YouTube video ID larini shu yerga kiriting:
 const VIDEO_IDS = {
-  uz: "xXcMtqop4xQ",  // O'zbek tilidagi video
-  ru: "bCXzUPGEfRg",  // Rus tilidagi video
+  uz: "xXcMtqop4xQ",
+  ru: "bCXzUPGEfRg",
 };
 
 export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean, lang: Language }) {
@@ -18,100 +17,155 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
   const [playing, setPlaying] = useState(false);
 
   return (
-    <div className="relative min-h-screen pt-16 sm:pt-20">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-16 sm:pb-24 text-center">
+    <div className="relative min-h-screen">
+
+      {/* ── HERO ─────────────────────────────────────────────────── */}
+      <section className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
+
+        {/* Top accent line */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute top-0 left-0 right-0 h-px origin-left bg-linear-to-r from-transparent via-primary/60 to-transparent"
+        />
+
+        {/* Corner marks */}
+        <div className="absolute top-8 left-8 hidden lg:block">
+          <div className="w-6 h-px bg-primary/40" />
+          <div className="h-6 w-px bg-primary/40 mt-0" />
+        </div>
+        <div className="absolute top-8 right-8 hidden lg:block">
+          <div className="w-6 h-px bg-primary/40 ml-auto" />
+          <div className="h-6 w-px bg-primary/40 ml-auto" />
+        </div>
+
+        {/* Status badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10"
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-primary/25 bg-primary/8 px-5 py-2 text-[11px] font-black tracking-[0.2em] text-primary uppercase backdrop-blur-sm"
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-black tracking-widest text-primary uppercase"
-          >
-            <Sparkles size={14} />
-            {t.tag}
-          </motion.div>
-
-          <h1 className="mt-6 text-4xl font-black tracking-tighter sm:text-7xl lg:text-9xl">
-            {lang === 'uz' ? (
-              <>Sizning <span className="text-primary">raqamli</span> <br className="hidden sm:block" /> shartnomangiz</>
-            ) : (
-              <>Ваш <span className="text-primary">цифровой</span> <br className="hidden sm:block" /> контракт</>
-            )}
-          </h1>
-          
-          <p className="mx-auto mt-4 max-w-2xl text-sm font-medium text-muted-foreground/80 sm:text-base md:text-xl">
-            {t.subtitle}
-          </p>
-
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3 sm:gap-5">
-            <Link
-              href={isAuthenticated ? "/dashboard" : "/register"}
-              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gold px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-black text-gold-foreground shadow-2xl transition-all hover:scale-105 hover:bg-gold-hover hover:shadow-[0_20px_60px_rgba(212,165,55,0.35)] active:scale-95"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                {isAuthenticated ? t.toDashboard : t.start} 
-                <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
-              </span>
-              <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
-            </Link>
-            
-            <Link
-              href="/about"
-              className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-8 py-4 sm:px-10 sm:py-5 text-base sm:text-lg font-black text-foreground transition-all hover:bg-white/10 hover:border-white/20"
-            >
-              {t.howItWorks}
-            </Link>
-          </div>
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+          {t.tag}
         </motion.div>
 
-        {/* Floating Mouse Interaction Hint */}
+        {/* Main title — oversized, terminal-industries style */}
+        <motion.h1
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.15, ease: [0.21, 0.45, 0.15, 1.0] }}
+          className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase"
+        >
+          {lang === "uz" ? (
+            <>
+              Raqamli<br />
+              <span className="text-primary">Shartnoma</span>
+            </>
+          ) : (
+            <>
+              Цифровой<br />
+              <span className="text-primary">Контракт</span>
+            </>
+          )}
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.55, duration: 0.8 }}
+          className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed text-muted-foreground/70 sm:text-base"
+        >
+          {t.subtitle}
+        </motion.p>
+
+        {/* CTAs */}
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="mt-10 hidden sm:flex flex-col items-center gap-2 text-muted-foreground opacity-40"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75, duration: 0.6 }}
+          className="mt-10 flex flex-col gap-3 sm:flex-row"
         >
-          <MousePointer2 size={20} />
-          <span className="text-xs font-bold uppercase tracking-widest">{t.playWithBg}</span>
+          <Link
+            href={isAuthenticated ? "/dashboard" : "/register"}
+            className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-9 py-4 text-base font-black text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              {isAuthenticated ? t.toDashboard : t.start}
+              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+            </span>
+            <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/15 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+          </Link>
+
+          <Link
+            href="/about"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-9 py-4 text-base font-black backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10"
+          >
+            {t.howItWorks}
+          </Link>
         </motion.div>
 
-        {/* Features Grid */}
-        <div className="mt-16 sm:mt-24 grid gap-5 sm:gap-8 md:grid-cols-3">
+        {/* Scroll indicator */}
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+          className="absolute bottom-10 flex flex-col items-center gap-2 text-muted-foreground/30"
+        >
+          <span className="text-[9px] font-black uppercase tracking-[0.35em]">scroll</span>
+          <ChevronDown size={14} />
+        </motion.div>
+
+        {/* Side rule lines */}
+        <div className="absolute left-8 top-1/2 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex">
+          {[16, 6, 12, 6, 8].map((w, i) => (
+            <motion.div
+              key={i}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 1 + i * 0.06, duration: 0.35 }}
+              style={{ width: w }}
+              className="h-px origin-left bg-primary/30"
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── FEATURES ─────────────────────────────────────────────── */}
+      <section className="container mx-auto px-4 pb-20 sm:px-6">
+        <div className="grid gap-5 sm:gap-8 md:grid-cols-3">
           {t.features.map((feature, i) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + i * 0.1 }}
-              className="group relative overflow-hidden rounded-3xl border border-white/5 bg-white/5 p-6 sm:p-10 text-left backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-white/10"
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="group relative overflow-hidden rounded-3xl border border-white/5 bg-white/5 p-8 text-left backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-white/10"
             >
-              <div className="mb-4 sm:mb-6 inline-flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-6">
-                {i === 0 ? <ShieldCheck size={24} className="sm:hidden" /> : i === 1 ? <Zap size={24} className="sm:hidden" /> : <FileText size={24} className="sm:hidden" />}
-                {i === 0 ? <ShieldCheck size={32} className="hidden sm:block" /> : i === 1 ? <Zap size={32} className="hidden sm:block" /> : <FileText size={32} className="hidden sm:block" />}
+              <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-6">
+                {i === 0 ? <ShieldCheck size={28} /> : i === 1 ? <Zap size={28} /> : <FileText size={28} />}
               </div>
-              <h3 className="text-xl sm:text-2xl font-black tracking-tight">{feature.title}</h3>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                {feature.desc}
-              </p>
-              
-              {/* Decorative accent */}
+              <h3 className="text-xl font-black tracking-tight sm:text-2xl">{feature.title}</h3>
+              <p className="mt-4 leading-relaxed text-muted-foreground">{feature.desc}</p>
               <div className="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/20" />
             </motion.div>
           ))}
         </div>
 
-        {/* Video Section */}
-        <div className="mt-20 sm:mt-32 mb-12 sm:mb-20">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-8 sm:mb-12 text-left">
-            <h2 className="text-2xl sm:text-4xl font-black tracking-tight md:text-5xl">
+        {/* ── VIDEO SECTION ──────────────────────────────────────── */}
+        <div className="mt-24 mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-12 text-left"
+          >
+            <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
               {lang === "uz" ? "Nima uchun shartnoma?" : "Зачем нужен контракт?"}
             </h2>
-            <p className="mt-3 text-base sm:text-xl text-muted-foreground font-medium max-w-2xl">
+            <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-xl">
               {lang === "uz"
                 ? "Qisqa video orqali shartnomaning ahamiyatini bilib oling."
                 : "Узнайте о важности контракта с помощью короткого видео."}
@@ -121,8 +175,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           <div className="grid gap-10 lg:grid-cols-2 items-start">
             {/* Player */}
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              {/* Language tabs */}
-              <div className="flex gap-2 mb-4">
+              <div className="mb-4 flex gap-2">
                 {(["uz", "ru"] as const).map((l) => (
                   <button
                     key={l}
@@ -138,12 +191,11 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                 ))}
               </div>
 
-              {/* Video player */}
               <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-card shadow-2xl" style={{ aspectRatio: "16/9" }}>
                 {playing ? (
                   <iframe
                     key={videoLang}
-                    src={`https://www.youtube-nocookie.com/embed/${VIDEO_IDS[videoLang]}?autoplay=1&rel=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=ru&hl=ru`}
+                    src={`https://www.youtube-nocookie.com/embed/${VIDEO_IDS[videoLang]}?autoplay=1&rel=0&modestbranding=1`}
                     title={videoLang === "uz" ? "Shartnoma haqida video" : "Видео о контракте"}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -157,19 +209,19 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                       className="h-full w-full object-cover"
                       onError={(e) => { (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${VIDEO_IDS[videoLang]}/hqdefault.jpg`; }}
                     />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                       <button
                         onClick={() => setPlaying(true)}
-                        className="group flex h-20 w-20 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all hover:scale-110 hover:bg-primary hover:border-primary shadow-2xl"
+                        className="group flex h-20 w-20 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:border-primary hover:bg-primary"
                       >
-                        <Play size={32} className="text-white ml-1 transition-transform group-hover:scale-110" fill="currentColor" />
+                        <Play size={32} className="ml-1 text-white transition-transform group-hover:scale-110" fill="currentColor" />
                       </button>
                     </div>
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                      <span className="rounded-xl bg-black/60 backdrop-blur-sm px-3 py-1.5 text-xs font-black text-white uppercase tracking-widest">
+                      <span className="rounded-xl bg-black/60 px-3 py-1.5 text-xs font-black uppercase tracking-widest text-white backdrop-blur-sm">
                         {videoLang === "uz" ? "O'zbek tili" : "Русский язык"}
                       </span>
-                      <span className="rounded-xl bg-primary/80 backdrop-blur-sm px-3 py-1.5 text-xs font-black text-white">
+                      <span className="rounded-xl bg-primary/80 px-3 py-1.5 text-xs font-black text-white backdrop-blur-sm">
                         ▶ Play
                       </span>
                     </div>
@@ -181,55 +233,15 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             {/* Key points */}
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="lg:pt-12">
               {(lang === "uz" ? [
-                {
-                  Icon: Scale,
-                  num: "01",
-                  title: "Huquqiy himoya",
-                  desc: "Shartnoma qonun kuchiga ega hujjat bo'lib, nizoli vaziyatlarda sudda asosiy dalil sifatida qabul qilinadi. U sizning har qanday talab va huquqlaringizni rasmiy ravishda mustahkamlaydi.",
-                },
-                {
-                  Icon: Banknote,
-                  num: "02",
-                  title: "To'lov kafolati",
-                  desc: "Ish hajmi, narxi va to'lov muddatlari oldindan yozma belgilanadi. Bajarilgan ish uchun to'liq haq olish huquqingiz shartnoma bilan himoyalanadi.",
-                },
-                {
-                  Icon: ClipboardList,
-                  num: "03",
-                  title: "Aniq majburiyatlar",
-                  desc: "Kim, nima, qachon va qancha bajarishi — barchasi hujjatda ko'rsatiladi. Bu tushunmovchilik va bahslarning oldini oladi.",
-                },
-                {
-                  Icon: Handshake,
-                  num: "04",
-                  title: "Ishonchli hamkorlik",
-                  desc: "Yozma kelishuv ikki tomon o'rtasida professional munosabat o'rnatadi va uzoq muddatli hamkorlik uchun poydevor bo'ladi.",
-                },
+                { Icon: Scale,       num: "01", title: "Huquqiy himoya",      desc: "Shartnoma qonun kuchiga ega hujjat bo'lib, nizoli vaziyatlarda sudda asosiy dalil sifatida qabul qilinadi." },
+                { Icon: Banknote,    num: "02", title: "To'lov kafolati",     desc: "Ish hajmi, narxi va to'lov muddatlari oldindan yozma belgilanadi va huquqingiz himoyalanadi." },
+                { Icon: ClipboardList, num: "03", title: "Aniq majburiyatlar", desc: "Kim, nima, qachon va qancha bajarishi — barchasi hujjatda ko'rsatiladi." },
+                { Icon: Handshake,   num: "04", title: "Ishonchli hamkorlik", desc: "Yozma kelishuv professional munosabat o'rnatadi va uzoq muddatli hamkorlik uchun poydevor bo'ladi." },
               ] : [
-                {
-                  Icon: Scale,
-                  num: "01",
-                  title: "Правовая защита",
-                  desc: "Договор имеет юридическую силу и является основным доказательством в суде при спорных ситуациях. Он официально закрепляет все ваши права и требования.",
-                },
-                {
-                  Icon: Banknote,
-                  num: "02",
-                  title: "Гарантия оплаты",
-                  desc: "Объём работ, стоимость и сроки оплаты фиксируются заранее в письменной форме. Ваше право на полную оплату за выполненную работу защищено договором.",
-                },
-                {
-                  Icon: ClipboardList,
-                  num: "03",
-                  title: "Чёткие обязательства",
-                  desc: "Кто, что, когда и в каком объёме должен сделать — всё это прописывается в документе. Это исключает недопонимание и споры.",
-                },
-                {
-                  Icon: Handshake,
-                  num: "04",
-                  title: "Надёжное партнёрство",
-                  desc: "Письменное соглашение устанавливает профессиональные отношения между сторонами и создаёт основу для долгосрочного сотрудничества.",
-                },
+                { Icon: Scale,       num: "01", title: "Правовая защита",       desc: "Договор имеет юридическую силу и является основным доказательством в суде при спорных ситуациях." },
+                { Icon: Banknote,    num: "02", title: "Гарантия оплаты",       desc: "Объём работ, стоимость и сроки оплаты фиксируются заранее в письменной форме." },
+                { Icon: ClipboardList, num: "03", title: "Чёткие обязательства", desc: "Кто, что, когда и в каком объёме должен сделать — всё прописывается в документе." },
+                { Icon: Handshake,   num: "04", title: "Надёжное партнёрство", desc: "Письменное соглашение устанавливает профессиональные отношения между сторонами." },
               ]).map((point, i) => (
                 <motion.div
                   key={i}
@@ -237,23 +249,18 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
-                  className="group relative flex gap-5 py-6 border-b border-white/5 last:border-0 transition-all hover:border-primary/10"
+                  className="group relative flex gap-5 border-b border-white/5 py-6 last:border-0 transition-all hover:border-primary/10"
                 >
-                  {/* Vertical accent line on hover */}
-                  <div className="absolute left-0 top-6 bottom-6 w-px bg-primary scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
-
-                  {/* Icon box */}
-                  <div className="shrink-0 flex flex-col items-center gap-2 pl-3">
+                  <div className="absolute left-0 top-6 bottom-6 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100" />
+                  <div className="flex shrink-0 flex-col items-center gap-2 pl-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-primary/70 transition-all group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary">
                       <point.Icon size={18} strokeWidth={1.5} />
                     </div>
-                    <span className="text-[10px] font-black tracking-widest text-muted-foreground/30 group-hover:text-primary/40 transition-colors">{point.num}</span>
+                    <span className="text-[10px] font-black tracking-widest text-muted-foreground/30 transition-colors group-hover:text-primary/40">{point.num}</span>
                   </div>
-
-                  {/* Text */}
-                  <div className="pt-1 pr-2">
-                    <p className="text-sm font-black tracking-tight text-foreground mb-1.5 group-hover:text-primary transition-colors">{point.title}</p>
-                    <p className="text-[13px] text-muted-foreground leading-relaxed">{point.desc}</p>
+                  <div className="pr-2 pt-1">
+                    <p className="mb-1.5 text-sm font-black tracking-tight text-foreground transition-colors group-hover:text-primary">{point.title}</p>
+                    <p className="text-[13px] leading-relaxed text-muted-foreground">{point.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -261,30 +268,30 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           </div>
         </div>
 
-        {/* Templates Section */}
-        <div className="mt-20 sm:mt-32 mb-12 sm:mb-20">
+        {/* ── TEMPLATES ─────────────────────────────────────────── */}
+        <div className="mt-24 mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-left mb-8 sm:mb-14"
+            className="mb-14 text-left"
           >
-            <h2 className="text-2xl sm:text-4xl font-black tracking-tight md:text-5xl">{t.templates.title}</h2>
-            <p className="mt-3 text-base sm:text-xl text-muted-foreground font-medium max-w-2xl">{t.templates.subtitle}</p>
+            <h2 className="text-3xl font-black tracking-tight sm:text-5xl">{t.templates.title}</h2>
+            <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-xl">{t.templates.subtitle}</p>
           </motion.div>
 
-          <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {t.templates.items.map((item, i) => {
               const images = [
-                "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop",   // Design
-                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop",  // Programming
-                "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",  // Marketing
-                "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop",     // Consulting
-                "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop",  // Photo/Video
-                "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop",  // Translation
-                "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop",  // Tutoring
-                "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800&auto=format&fit=crop",  // Logistics
-                "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?q=80&w=800&auto=format&fit=crop",  // Content
+                "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?q=80&w=800&auto=format&fit=crop",
               ];
               const params = new URLSearchParams({
                 t: String(i),
@@ -300,19 +307,16 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
-                  className="relative overflow-hidden rounded-2xl sm:rounded-[28px] border border-white/10 shadow-xl cursor-pointer bg-card"
+                  className="relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-card shadow-xl sm:rounded-[28px]"
                 >
-                  {/* Image */}
-                  <div className="relative h-36 sm:h-52 overflow-hidden">
+                  <div className="relative h-36 overflow-hidden sm:h-52">
                     <img
                       src={images[i] ?? images[i % images.length]}
                       alt={item.name}
-                      className="h-full w-full object-cover grayscale-[60%]"
+                      className="h-full w-full object-cover grayscale-60"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
                   </div>
-
-                  {/* Content always visible */}
                   <div className="px-4 pb-4 pt-2">
                     <h4 className="text-sm font-black leading-tight">{item.name}</h4>
                     <p className="mt-0.5 text-[11px] font-bold text-primary">{Number(item.amount).toLocaleString()} UZS</p>
@@ -320,7 +324,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                       href={`/contracts/new?${params.toString()}`}
                       className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-black text-white transition-all hover:bg-primary/90 active:scale-95"
                     >
-                      {lang === 'uz' ? 'Tanlash' : 'Выбрать'}
+                      {lang === "uz" ? "Tanlash" : "Выбрать"}
                       <ArrowRight size={11} />
                     </Link>
                   </div>
@@ -330,9 +334,6 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           </div>
         </div>
       </section>
-
-      {/* Decorative background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-200 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
     </div>
   );
 }
