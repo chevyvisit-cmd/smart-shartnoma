@@ -37,6 +37,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
               {/* Desktop Nav */}
               <nav className="hidden md:flex items-center gap-1">
                 {[
+                  { name: lang === "uz" ? "Bosh sahifa" : "Главная", href: "/" },
                   { name: t.howItWorks, href: "/about" },
                   { name: t.contracts, href: "/contracts" },
                 ].map((item) => (
@@ -133,6 +134,7 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
           >
             <nav className="flex flex-col gap-3">
               {[
+                { name: lang === "uz" ? "Bosh sahifa" : "Главная", href: "/" },
                 { name: t.howItWorks, href: "/about" },
                 { name: t.contracts, href: "/contracts" },
                 ...(user ? [
