@@ -32,7 +32,7 @@ export async function Footer() {
       ];
 
   return (
-    <footer className="border-t border-white/5 bg-background/60 backdrop-blur-sm">
+    <footer className="border-t border-border bg-card">
       <div className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
 
@@ -96,18 +96,18 @@ export async function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 sm:flex-row">
-          <span className="text-xs text-muted-foreground/40">
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-8 sm:flex-row">
+          <span className="text-xs text-muted-foreground">
             © {year} Smart-Shartnoma.{" "}
             {lang === "ru" ? "Все права защищены." : "Barcha huquqlar himoyalangan."}
           </span>
 
           <div className="flex items-center gap-6">
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/25">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/50">
               v2.0.0
             </span>
             <div className="h-px w-12 bg-primary/20" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/25">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/50">
               UZ
             </span>
           </div>

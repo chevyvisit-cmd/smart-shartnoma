@@ -101,7 +101,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
 
           <Link
             href="/about"
-            className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-9 py-4 text-base font-black backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-secondary/60 px-9 py-4 text-base font-black backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-secondary"
           >
             {t.howItWorks}
           </Link>
@@ -142,7 +142,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group relative overflow-hidden rounded-3xl border border-white/5 bg-white/5 p-8 text-left backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-white/10"
+              className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 text-left transition-all hover:border-primary/40 hover:bg-secondary"
             >
               <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-6">
                 {i === 0 ? <ShieldCheck size={28} /> : i === 1 ? <Zap size={28} /> : <FileText size={28} />}
@@ -183,7 +183,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                     className={`rounded-xl px-5 py-2 text-sm font-black uppercase tracking-widest transition-all ${
                       videoLang === l
                         ? "bg-primary text-white shadow-lg shadow-primary/30"
-                        : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary/80"
                     }`}
                   >
                     {l === "uz" ? "O'zbek" : "Русский"}
@@ -191,7 +191,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                 ))}
               </div>
 
-              <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-card shadow-2xl" style={{ aspectRatio: "16/9" }}>
+              <div className="relative overflow-hidden rounded-[28px] border border-border bg-card shadow-2xl" style={{ aspectRatio: "16/9" }}>
                 {playing ? (
                   <iframe
                     key={videoLang}
@@ -249,11 +249,11 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
-                  className="group relative flex gap-5 border-b border-white/5 py-6 last:border-0 transition-all hover:border-primary/10"
+                  className="group relative flex gap-5 border-b border-border/60 py-6 last:border-0 transition-all hover:border-primary/30"
                 >
                   <div className="absolute left-0 top-6 bottom-6 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100" />
                   <div className="flex shrink-0 flex-col items-center gap-2 pl-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-primary/70 transition-all group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-primary/70 transition-all group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
                       <point.Icon size={18} strokeWidth={1.5} />
                     </div>
                     <span className="text-[10px] font-black tracking-widest text-muted-foreground/30 transition-colors group-hover:text-primary/40">{point.num}</span>
@@ -307,7 +307,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
-                  className="relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-card shadow-xl sm:rounded-[28px]"
+                  className="relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-xl sm:rounded-[28px]"
                 >
                   <div className="relative h-36 overflow-hidden sm:h-52">
                     <img
