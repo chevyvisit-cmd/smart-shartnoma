@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ArrowRight, ShieldCheck, Zap, FileText, Play, Scale, Banknote, ClipboardList, Handshake, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Language, translations } from "@/lib/translations";
+import { ContractAnimation } from "@/components/motion/contract-animation";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -22,103 +23,106 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
 
+        {/* Contract video animation background */}
+        <ContractAnimation />
+
+        {/* Gradient overlay — ensures text stays readable */}
+        <div className="absolute inset-0 bg-linear-to-b from-background/70 via-background/40 to-background/70 pointer-events-none" />
+
         {/* Top accent line */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute top-0 left-0 right-0 h-px origin-left bg-linear-to-r from-transparent via-primary/60 to-transparent"
+          className="absolute top-0 left-0 right-0 h-px origin-left bg-linear-to-r from-transparent via-primary/60 to-transparent z-10"
         />
 
         {/* Corner marks */}
-        <div className="absolute top-8 left-8 hidden lg:block">
+        <div className="absolute top-8 left-8 hidden lg:block z-10">
           <div className="w-6 h-px bg-primary/40" />
           <div className="h-6 w-px bg-primary/40 mt-0" />
         </div>
-        <div className="absolute top-8 right-8 hidden lg:block">
+        <div className="absolute top-8 right-8 hidden lg:block z-10">
           <div className="w-6 h-px bg-primary/40 ml-auto" />
           <div className="h-6 w-px bg-primary/40 ml-auto" />
         </div>
 
-        {/* Status badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-primary/25 bg-primary/8 px-5 py-2 text-[11px] font-black tracking-[0.2em] text-primary uppercase backdrop-blur-sm"
-        >
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-          {t.tag}
-        </motion.div>
-
-        {/* Main title — oversized, terminal-industries style */}
-        <motion.h1
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.15, ease: [0.21, 0.45, 0.15, 1.0] }}
-          className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase"
-        >
-          {lang === "uz" ? (
-            <>
-              Raqamli<br />
-              <span className="text-primary">Shartnoma</span>
-            </>
-          ) : (
-            <>
-              Цифровой<br />
-              <span className="text-primary">Контракт</span>
-            </>
-          )}
-        </motion.h1>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.55, duration: 0.8 }}
-          className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed text-muted-foreground/70 sm:text-base"
-        >
-          {t.subtitle}
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.75, duration: 0.6 }}
-          className="mt-10 flex flex-col gap-3 sm:flex-row"
-        >
-          <Link
-            href={isAuthenticated ? "/dashboard" : "/register"}
-            className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-9 py-4 text-base font-black text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30 active:scale-95"
+        {/* All hero content sits above the animation & overlay */}
+        <div className="relative z-10 flex flex-col items-center text-center">
+          {/* Status badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-primary/25 bg-primary/10 px-5 py-2 text-[11px] font-black tracking-[0.2em] text-primary uppercase backdrop-blur-sm"
           >
-            <span className="relative z-10 flex items-center gap-2">
-              {isAuthenticated ? t.toDashboard : t.start}
-              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-            </span>
-            <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/15 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
-          </Link>
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            {t.tag}
+          </motion.div>
 
-          <Link
-            href="/about"
-            className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-secondary/60 px-9 py-4 text-base font-black backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-secondary"
+          {/* Main title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.15, ease: [0.21, 0.45, 0.15, 1.0] }}
+            className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase"
           >
-            {t.howItWorks}
-          </Link>
-        </motion.div>
+            {lang === "uz" ? (
+              <>Raqamli<br /><span className="text-primary">Shartnoma</span></>
+            ) : (
+              <>Цифровой<br /><span className="text-primary">Контракт</span></>
+            )}
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.55, duration: 0.8 }}
+            className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed text-muted-foreground sm:text-base"
+          >
+            {t.subtitle}
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.75, duration: 0.6 }}
+            className="mt-10 flex flex-col gap-3 sm:flex-row"
+          >
+            <Link
+              href={isAuthenticated ? "/dashboard" : "/register"}
+              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-9 py-4 text-base font-black text-white shadow-lg shadow-primary/25 transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                {isAuthenticated ? t.toDashboard : t.start}
+                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+              </span>
+              <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/15 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+            </Link>
+
+            <Link
+              href="/about"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-secondary/60 px-9 py-4 text-base font-black backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-secondary"
+            >
+              {t.howItWorks}
+            </Link>
+          </motion.div>
+        </div>
 
         {/* Scroll indicator */}
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          className="absolute bottom-10 flex flex-col items-center gap-2 text-muted-foreground/30"
+          className="absolute bottom-10 z-10 flex flex-col items-center gap-2 text-muted-foreground/40"
         >
           <span className="text-[9px] font-black uppercase tracking-[0.35em]">scroll</span>
           <ChevronDown size={14} />
         </motion.div>
 
         {/* Side rule lines */}
-        <div className="absolute left-8 top-1/2 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex">
+        <div className="absolute left-8 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex">
           {[16, 6, 12, 6, 8].map((w, i) => (
             <motion.div
               key={i}
@@ -155,32 +159,32 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
         </div>
 
         {/* ── VIDEO SECTION ──────────────────────────────────────── */}
-        <div className="mt-24 mb-16">
+        <div className="mt-28 mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-12 text-left"
+            className="mb-14 text-left"
           >
-            <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
+            <h2 className="text-4xl font-black tracking-tight sm:text-6xl">
               {lang === "uz" ? "Nima uchun shartnoma?" : "Зачем нужен контракт?"}
             </h2>
-            <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-xl">
+            <p className="mt-4 max-w-2xl text-lg font-medium text-muted-foreground sm:text-2xl">
               {lang === "uz"
                 ? "Qisqa video orqali shartnomaning ahamiyatini bilib oling."
                 : "Узнайте о важности контракта с помощью короткого видео."}
             </p>
           </motion.div>
 
-          <div className="grid gap-10 lg:grid-cols-2 items-start">
+          <div className="grid gap-12 lg:grid-cols-2 items-start">
             {/* Player */}
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <div className="mb-4 flex gap-2">
+              <div className="mb-5 flex gap-3">
                 {(["uz", "ru"] as const).map((l) => (
                   <button
                     key={l}
                     onClick={() => { setVideoLang(l); setPlaying(false); }}
-                    className={`rounded-xl px-5 py-2 text-sm font-black uppercase tracking-widest transition-all ${
+                    className={`rounded-xl px-6 py-2.5 text-sm font-black uppercase tracking-widest transition-all ${
                       videoLang === l
                         ? "bg-primary text-white shadow-lg shadow-primary/30"
                         : "bg-secondary text-muted-foreground hover:bg-secondary/80"
@@ -212,16 +216,16 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                       <button
                         onClick={() => setPlaying(true)}
-                        className="group flex h-20 w-20 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:border-primary hover:bg-primary"
+                        className="group flex h-24 w-24 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:border-primary hover:bg-primary"
                       >
-                        <Play size={32} className="ml-1 text-white transition-transform group-hover:scale-110" fill="currentColor" />
+                        <Play size={38} className="ml-1.5 text-white transition-transform group-hover:scale-110" fill="currentColor" />
                       </button>
                     </div>
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                      <span className="rounded-xl bg-black/60 px-3 py-1.5 text-xs font-black uppercase tracking-widest text-white backdrop-blur-sm">
+                    <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between">
+                      <span className="rounded-xl bg-black/60 px-4 py-2 text-xs font-black uppercase tracking-widest text-white backdrop-blur-sm">
                         {videoLang === "uz" ? "O'zbek tili" : "Русский язык"}
                       </span>
-                      <span className="rounded-xl bg-primary/80 px-3 py-1.5 text-xs font-black text-white backdrop-blur-sm">
+                      <span className="rounded-xl bg-primary/80 px-4 py-2 text-xs font-black text-white backdrop-blur-sm">
                         ▶ Play
                       </span>
                     </div>
@@ -231,17 +235,17 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             </motion.div>
 
             {/* Key points */}
-            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="lg:pt-12">
+            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               {(lang === "uz" ? [
-                { Icon: Scale,       num: "01", title: "Huquqiy himoya",      desc: "Shartnoma qonun kuchiga ega hujjat bo'lib, nizoli vaziyatlarda sudda asosiy dalil sifatida qabul qilinadi." },
-                { Icon: Banknote,    num: "02", title: "To'lov kafolati",     desc: "Ish hajmi, narxi va to'lov muddatlari oldindan yozma belgilanadi va huquqingiz himoyalanadi." },
-                { Icon: ClipboardList, num: "03", title: "Aniq majburiyatlar", desc: "Kim, nima, qachon va qancha bajarishi — barchasi hujjatda ko'rsatiladi." },
-                { Icon: Handshake,   num: "04", title: "Ishonchli hamkorlik", desc: "Yozma kelishuv professional munosabat o'rnatadi va uzoq muddatli hamkorlik uchun poydevor bo'ladi." },
+                { Icon: Scale,        num: "01", title: "Huquqiy himoya",      desc: "Shartnoma qonun kuchiga ega hujjat bo'lib, nizoli vaziyatlarda sudda asosiy dalil sifatida qabul qilinadi." },
+                { Icon: Banknote,     num: "02", title: "To'lov kafolati",     desc: "Ish hajmi, narxi va to'lov muddatlari oldindan yozma belgilanadi va huquqingiz himoyalanadi." },
+                { Icon: ClipboardList,num: "03", title: "Aniq majburiyatlar",  desc: "Kim, nima, qachon va qancha bajarishi — barchasi hujjatda ko'rsatiladi." },
+                { Icon: Handshake,    num: "04", title: "Ishonchli hamkorlik", desc: "Yozma kelishuv professional munosabat o'rnatadi va uzoq muddatli hamkorlik uchun poydevor bo'ladi." },
               ] : [
-                { Icon: Scale,       num: "01", title: "Правовая защита",       desc: "Договор имеет юридическую силу и является основным доказательством в суде при спорных ситуациях." },
-                { Icon: Banknote,    num: "02", title: "Гарантия оплаты",       desc: "Объём работ, стоимость и сроки оплаты фиксируются заранее в письменной форме." },
-                { Icon: ClipboardList, num: "03", title: "Чёткие обязательства", desc: "Кто, что, когда и в каком объёме должен сделать — всё прописывается в документе." },
-                { Icon: Handshake,   num: "04", title: "Надёжное партнёрство", desc: "Письменное соглашение устанавливает профессиональные отношения между сторонами." },
+                { Icon: Scale,        num: "01", title: "Правовая защита",        desc: "Договор имеет юридическую силу и является основным доказательством в суде при спорных ситуациях." },
+                { Icon: Banknote,     num: "02", title: "Гарантия оплаты",        desc: "Объём работ, стоимость и сроки оплаты фиксируются заранее в письменной форме." },
+                { Icon: ClipboardList,num: "03", title: "Чёткие обязательства",   desc: "Кто, что, когда и в каком объёме должен сделать — всё прописывается в документе." },
+                { Icon: Handshake,    num: "04", title: "Надёжное партнёрство",   desc: "Письменное соглашение устанавливает профессиональные отношения между сторонами." },
               ]).map((point, i) => (
                 <motion.div
                   key={i}
@@ -249,18 +253,22 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
-                  className="group relative flex gap-5 border-b border-border/60 py-6 last:border-0 transition-all hover:border-primary/30"
+                  className="group relative flex gap-6 border-b border-border/60 py-8 last:border-0 transition-all hover:border-primary/30"
                 >
-                  <div className="absolute left-0 top-6 bottom-6 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100" />
-                  <div className="flex shrink-0 flex-col items-center gap-2 pl-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-primary/70 transition-all group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
-                      <point.Icon size={18} strokeWidth={1.5} />
+                  <div className="absolute left-0 top-8 bottom-8 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100" />
+
+                  {/* Icon */}
+                  <div className="flex shrink-0 flex-col items-center gap-2 pl-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-secondary text-primary/70 transition-all group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
+                      <point.Icon size={22} strokeWidth={1.5} />
                     </div>
-                    <span className="text-[10px] font-black tracking-widest text-muted-foreground/30 transition-colors group-hover:text-primary/40">{point.num}</span>
+                    <span className="text-[10px] font-black tracking-widest text-muted-foreground/40 transition-colors group-hover:text-primary/50">{point.num}</span>
                   </div>
-                  <div className="pr-2 pt-1">
-                    <p className="mb-1.5 text-sm font-black tracking-tight text-foreground transition-colors group-hover:text-primary">{point.title}</p>
-                    <p className="text-[13px] leading-relaxed text-muted-foreground">{point.desc}</p>
+
+                  {/* Text */}
+                  <div className="pt-1">
+                    <p className="mb-2 text-base font-black tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-lg">{point.title}</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{point.desc}</p>
                   </div>
                 </motion.div>
               ))}
