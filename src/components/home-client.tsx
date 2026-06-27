@@ -8,6 +8,7 @@ import { Language, translations } from "@/lib/translations";
 import { HeroBackground } from "@/components/motion/hero-background";
 import { ScrollScrubA } from "@/components/scroll-scrub-a";
 import { ScrollScrubB } from "@/components/scroll-scrub-b";
+import { ScrollCursor } from "@/components/motion/scroll-cursor";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -21,6 +22,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
 
   return (
     <div className="relative min-h-screen">
+      <ScrollCursor />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">

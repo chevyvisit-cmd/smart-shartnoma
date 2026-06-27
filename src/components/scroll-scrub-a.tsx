@@ -43,7 +43,7 @@ export function ScrollScrubA({ lang }: { lang: Language }) {
   const uz = lang === "uz";
 
   return (
-    <div ref={sectionRef} className="relative" style={{ minHeight: "250vh" }}>
+    <div ref={sectionRef} className="relative" style={{ minHeight: "250vh" }} data-scroll-cursor>
       <div className="sticky top-0 h-screen overflow-hidden bg-[#0a1410]">
 
         {/* ── MOBILE: autoplay loop ── */}
