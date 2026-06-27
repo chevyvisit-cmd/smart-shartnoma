@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ArrowRight, ShieldCheck, Zap, FileText, Play, Scale, Banknote, ClipboardList, Handshake, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Language, translations } from "@/lib/translations";
-import { ContractAnimation } from "@/components/motion/contract-animation";
+import { HeroBackground } from "@/components/motion/hero-background";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -23,38 +23,28 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
 
-        {/* Contract video animation background */}
-        <ContractAnimation />
+        {/* z-0 → z-2: video, overlay, grid, sweep, top line */}
+        <HeroBackground />
 
-        {/* Gradient overlay — ensures text stays readable */}
-        <div className="absolute inset-0 bg-linear-to-b from-background/70 via-background/40 to-background/70 pointer-events-none" />
-
-        {/* Top accent line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute top-0 left-0 right-0 h-px origin-left bg-linear-to-r from-transparent via-primary/60 to-transparent z-10"
-        />
-
-        {/* Corner marks */}
-        <div className="absolute top-8 left-8 hidden lg:block z-10">
-          <div className="w-6 h-px bg-primary/40" />
-          <div className="h-6 w-px bg-primary/40 mt-0" />
+        {/* z-2: Corner brackets ⌐ */}
+        <div className="absolute top-8 left-8 hidden lg:block" style={{ zIndex: 2 }}>
+          <div className="w-7 h-0.5 bg-primary/60" />
+          <div className="h-7 w-0.5 bg-primary/60" />
         </div>
-        <div className="absolute top-8 right-8 hidden lg:block z-10">
-          <div className="w-6 h-px bg-primary/40 ml-auto" />
-          <div className="h-6 w-px bg-primary/40 ml-auto" />
+        <div className="absolute top-8 right-8 hidden lg:block" style={{ zIndex: 2 }}>
+          <div className="w-7 h-0.5 bg-primary/60 ml-auto" />
+          <div className="h-7 w-0.5 bg-primary/60 ml-auto" />
         </div>
 
-        {/* All hero content sits above the animation & overlay */}
-        <div className="relative z-10 flex flex-col items-center text-center">
-          {/* Status badge */}
+        {/* z-3: All foreground content */}
+        <div className="relative flex flex-col items-center text-center" style={{ zIndex: 3 }}>
+
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
+            initial={{ opacity: 0, y: -14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-primary/25 bg-primary/10 px-5 py-2 text-[11px] font-black tracking-[0.2em] text-primary uppercase backdrop-blur-sm"
+            className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-[11px] font-black tracking-[0.2em] text-primary uppercase backdrop-blur-sm"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
             {t.tag}
@@ -65,7 +55,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.15, ease: [0.21, 0.45, 0.15, 1.0] }}
-            className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase"
+            className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase text-white drop-shadow-lg"
           >
             {lang === "uz" ? (
               <>Raqamli<br /><span className="text-primary">Shartnoma</span></>
@@ -79,7 +69,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.55, duration: 0.8 }}
-            className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed text-muted-foreground sm:text-base"
+            className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed text-white/60 sm:text-base"
           >
             {t.subtitle}
           </motion.p>
@@ -93,44 +83,48 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           >
             <Link
               href={isAuthenticated ? "/dashboard" : "/register"}
-              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-9 py-4 text-base font-black text-white shadow-lg shadow-primary/25 transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-9 py-4 text-base font-black text-white shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:shadow-primary/40 active:scale-95"
             >
               <span className="relative z-10 flex items-center gap-2">
                 {isAuthenticated ? t.toDashboard : t.start}
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </span>
-              <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/15 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+              <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
             </Link>
 
             <Link
               href="/about"
-              className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-secondary/60 px-9 py-4 text-base font-black backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-secondary"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/8 px-9 py-4 text-base font-black text-white backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/15"
             >
               {t.howItWorks}
             </Link>
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator (z-3) */}
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          className="absolute bottom-10 z-10 flex flex-col items-center gap-2 text-muted-foreground/40"
+          className="absolute bottom-10 flex flex-col items-center gap-2 text-white/30"
+          style={{ zIndex: 3 }}
         >
           <span className="text-[9px] font-black uppercase tracking-[0.35em]">scroll</span>
           <ChevronDown size={14} />
         </motion.div>
 
-        {/* Side rule lines */}
-        <div className="absolute left-8 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex">
-          {[16, 6, 12, 6, 8].map((w, i) => (
+        {/* Side rule lines (z-2) */}
+        <div
+          className="absolute left-8 top-1/2 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex"
+          style={{ zIndex: 2 }}
+        >
+          {[18, 7, 14, 7, 10].map((w, i) => (
             <motion.div
               key={i}
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 1 + i * 0.06, duration: 0.35 }}
+              transition={{ delay: 1 + i * 0.06, duration: 0.4 }}
               style={{ width: w }}
-              className="h-px origin-left bg-primary/30"
+              className="h-px origin-left bg-primary/50"
             />
           ))}
         </div>

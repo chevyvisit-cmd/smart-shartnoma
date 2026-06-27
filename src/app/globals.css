@@ -102,3 +102,70 @@ body {
     border-color: var(--border);
   }
 }
+
+/* ── Hero background animations ──────────────────────────── */
+
+@keyframes hero-grid-move {
+  from { background-position: 0 0; }
+  to   { background-position: 40px 40px; }
+}
+
+@keyframes hero-sweep {
+  0%   { transform: translateX(-150%) skewX(-12deg); opacity: 0; }
+  6%   { opacity: 1; }
+  94%  { opacity: 1; }
+  100% { transform: translateX(250%) skewX(-12deg); opacity: 0; }
+}
+
+@keyframes hero-line-beam {
+  0%   { left: -45%; }
+  100% { left: 145%; }
+}
+
+/* Moving grid overlay */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(62, 142, 105, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(62, 142, 105, 0.13) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: hero-grid-move 9s linear infinite;
+}
+
+/* Diagonal light sweep beam */
+.hero-sweep-beam {
+  position: absolute;
+  top: -20%;
+  left: -40%;
+  width: 30%;
+  height: 140%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.065) 40%,
+    rgba(255, 255, 255, 0.065) 60%,
+    transparent 100%
+  );
+  transform: skewX(-12deg);
+  animation: hero-sweep 8s ease-in-out 1.5s infinite;
+  pointer-events: none;
+}
+
+/* Top sliding gradient line */
+.hero-top-line-beam {
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #2D6A4F 30%,
+    #D4A537 70%,
+    transparent 100%
+  );
+  animation: hero-line-beam 4s linear infinite;
+}
+
+/* Mobile: hide video element, poster div handles it */
+@media (max-width: 767px) {
+  .hero-video {
+    display: none !important;
+  }
+}
