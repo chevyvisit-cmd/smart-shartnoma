@@ -334,7 +334,6 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   </div>
                   <div className="px-4 pb-4 pt-2">
                     <h4 className="text-sm font-black leading-tight">{item.name}</h4>
-                    <p className="mt-0.5 text-[11px] font-bold text-primary">{Number(item.amount).toLocaleString()} UZS</p>
                     <Link
                       href={`/contracts/new?${params.toString()}`}
                       className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-black text-white transition-all hover:bg-primary/90 active:scale-95"
