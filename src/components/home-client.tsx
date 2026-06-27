@@ -6,6 +6,8 @@ import { ArrowRight, ShieldCheck, Zap, FileText, Play, Scale, Banknote, Clipboar
 import Link from "next/link";
 import { Language, translations } from "@/lib/translations";
 import { HeroBackground } from "@/components/motion/hero-background";
+import { ScrollScrubA } from "@/components/scroll-scrub-a";
+import { ScrollScrubB } from "@/components/scroll-scrub-b";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -152,6 +154,15 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           ))}
         </div>
 
+      </section>
+
+      {/* ── SCROLL SCRUB A: Ishonchga asoslangan kelishuv ──────── */}
+      <ScrollScrubA lang={lang} />
+
+      {/* ── SCROLL SCRUB B: Shartnoma tuzish qulayliklari ─────── */}
+      <ScrollScrubB lang={lang} />
+
+      <section className="container mx-auto px-4 sm:px-6">
         {/* ── VIDEO SECTION ──────────────────────────────────────── */}
         <div className="mt-28 mb-20">
           <motion.div
