@@ -122,13 +122,20 @@ body {
   100% { left: 145%; }
 }
 
-/* Moving grid overlay */
+/* Moving grid overlay — light mode default */
 .hero-grid {
+  background-image:
+    linear-gradient(rgba(45, 106, 79, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 106, 79, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: hero-grid-move 9s linear infinite;
+}
+
+/* Dark mode: brighter grid */
+.dark .hero-grid {
   background-image:
     linear-gradient(rgba(62, 142, 105, 0.13) 1px, transparent 1px),
     linear-gradient(90deg, rgba(62, 142, 105, 0.13) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: hero-grid-move 9s linear infinite;
 }
 
 /* Diagonal light sweep beam */
