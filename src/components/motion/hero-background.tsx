@@ -20,9 +20,9 @@ export function HeroBackground() {
   return (
     <div className="absolute inset-0">
 
-      {/* ── 1. POSTER / DARK FALLBACK (always present) ── */}
+      {/* ── 1. POSTER / FALLBACK (always present) ── */}
       <div
-        className="absolute inset-0 bg-[#0A1410] bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center dark:bg-[#0A1410] bg-[#F4F9F6]"
         style={{ backgroundImage: "url('/videos/hero-bg-poster.jpg')" }}
       />
 
@@ -43,13 +43,14 @@ export function HeroBackground() {
         </video>
       )}
 
-      {/* ── 3. DARK GRADIENT OVERLAY ── */}
+      {/* ── 3. GRADIENT OVERLAY — dark/light adaptive ── */}
       <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(10,20,16,0.55) 0%, rgba(10,20,16,0.85) 100%)",
-        }}
+        className="absolute inset-0 hidden dark:block"
+        style={{ background: "linear-gradient(180deg, rgba(10,20,16,0.55) 0%, rgba(10,20,16,0.85) 100%)" }}
+      />
+      <div
+        className="absolute inset-0 block dark:hidden"
+        style={{ background: "linear-gradient(180deg, rgba(244,249,246,0.78) 0%, rgba(244,249,246,0.94) 100%)" }}
       />
 
       {/* ── 4. MOVING GRID (z-1) ── */}

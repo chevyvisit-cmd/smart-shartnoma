@@ -59,7 +59,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.15, ease: [0.21, 0.45, 0.15, 1.0] }}
-            className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase text-white drop-shadow-lg"
+            className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase dark:text-white text-foreground dark:drop-shadow-lg"
           >
             {lang === "uz" ? (
               <>Raqamli<br /><span className="text-primary">Shartnoma</span></>
@@ -73,7 +73,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.55, duration: 0.8 }}
-            className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed text-white/60 sm:text-base"
+            className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed dark:text-white/60 text-muted-foreground sm:text-base"
           >
             {t.subtitle}
           </motion.p>
@@ -98,7 +98,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
 
             <Link
               href="/about"
-              className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/8 px-9 py-4 text-base font-black text-white backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/15"
+              className="flex items-center justify-center gap-2 rounded-2xl border dark:border-white/20 border-border dark:bg-white/8 bg-background/80 px-9 py-4 text-base font-black dark:text-white text-foreground backdrop-blur-sm transition-all dark:hover:border-white/40 hover:border-primary/40 dark:hover:bg-white/15 hover:bg-secondary"
             >
               {t.howItWorks}
             </Link>
@@ -109,7 +109,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          className="absolute bottom-10 flex flex-col items-center gap-2 text-white/30"
+          className="absolute bottom-10 flex flex-col items-center gap-2 dark:text-white/30 text-foreground/30"
           style={{ zIndex: 3 }}
         >
           <span className="text-[9px] font-black uppercase tracking-[0.35em]">scroll</span>
