@@ -325,28 +325,44 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
-                  className="relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-xl sm:rounded-[28px]"
+                  initial={{ opacity: 0, y: 32, scale: 0.96 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ delay: i * 0.07, duration: 0.5, ease: [0.21, 0.45, 0.15, 1.0] }}
+                  whileHover={{ y: -8, transition: { duration: 0.22, ease: "easeOut" } }}
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-lg hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 sm:rounded-[28px] transition-shadow duration-300"
                 >
+                  {/* Image */}
                   <div className="relative h-36 overflow-hidden sm:h-52">
                     <img
                       src={images[i] ?? images[i % images.length]}
                       alt={item.name}
-                      className="h-full w-full object-cover grayscale-60"
+                      className="h-full w-full object-cover grayscale-60 transition-all duration-500 group-hover:scale-[1.07] group-hover:grayscale-0"
                     />
-                    <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
+
+                    {/* Shimmer sweep */}
+                    <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/18 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full pointer-events-none" />
+
+                    {/* Bottom gradient */}
+                    <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
+
+                    {/* Index badge */}
+                    <div className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm text-[9px] font-black text-white/60 transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-110">
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
                   </div>
-                  <div className="px-4 pb-4 pt-2">
-                    <h4 className="text-sm font-black leading-tight">{item.name}</h4>
+
+                  {/* Content */}
+                  <div className="px-4 pb-4 pt-2.5">
+                    <h4 className="text-sm font-black leading-tight transition-colors duration-200 group-hover:text-primary">
+                      {item.name}
+                    </h4>
                     <Link
                       href={`/contracts/new?${params.toString()}`}
-                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-black text-white transition-all hover:bg-primary/90 active:scale-95"
+                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-black text-white transition-all duration-200 hover:bg-primary/90 active:scale-95 group-hover:shadow-md group-hover:shadow-primary/30"
                     >
                       {lang === "uz" ? "Tanlash" : "Выбрать"}
-                      <ArrowRight size={11} />
+                      <ArrowRight size={11} className="transition-transform duration-200 group-hover:translate-x-0.5" />
                     </Link>
                   </div>
                 </motion.div>
