@@ -87,19 +87,19 @@ export function ScrollScrubA({ lang }: { lang: Language }) {
               <div className="mb-6 text-[10px] font-black tracking-[0.3em] text-primary uppercase">
                 Smart-Shartnoma
               </div>
-              <h2 className="text-5xl font-black leading-[1.05] tracking-tight xl:text-6xl">
+              <h2 className="text-5xl font-black leading-[1.05] tracking-tight xl:text-6xl text-white">
                 {uz ? (
                   <>Har bir shartnoma —<br /><span className="text-primary">ishonchga</span><br />asoslangan kelishuv</>
                 ) : (
                   <>Каждый договор —<br /><span className="text-primary">в основе</span><br />доверие</>
                 )}
               </h2>
-              <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-6 max-w-md text-lg leading-relaxed text-white/55">
                 {uz
                   ? "Yozma kelishuv ikki tomon o'rtasida qonuniy bog'liqlik yaratadi va nizoli vaziyatlarda huquqingizni himoya qiladi."
                   : "Письменное соглашение создаёт правовую связь между сторонами и защищает ваши права в спорных ситуациях."}
               </p>
-              <div className="mt-10 flex items-center gap-3 text-sm text-muted-foreground/50">
+              <div className="mt-10 flex items-center gap-3 text-sm text-white/40">
                 <motion.div
                   animate={{ x: [0, 7, 0] }}
                   transition={{ repeat: Infinity, duration: 2 }}
