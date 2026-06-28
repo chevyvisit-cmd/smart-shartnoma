@@ -8,6 +8,7 @@ import { Language, translations } from "@/lib/translations";
 import { HeroBackground } from "@/components/motion/hero-background";
 import { ScrollScrubA } from "@/components/scroll-scrub-a";
 import { ScrollScrubB } from "@/components/scroll-scrub-b";
+import { ScrollScrubC } from "@/components/scroll-scrub-c";
 import { ScrollCursor } from "@/components/motion/scroll-cursor";
 
 const VIDEO_IDS = {
@@ -165,6 +166,9 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
 
       {/* ── SCROLL SCRUB B: Shartnoma tuzish qulayliklari ─────── */}
       <ScrollScrubB lang={lang} />
+
+      {/* ── SCROLL SCRUB C: So'z-so'z reveal ─────────────────── */}
+      <ScrollScrubC lang={lang} />
 
       <section className="container mx-auto px-4 sm:px-6">
         {/* ── VIDEO SECTION ──────────────────────────────────────── */}
