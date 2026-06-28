@@ -208,19 +208,7 @@ function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlay
 
 /* ── Template card constants ─────────────────────────────────────────────── */
 
-/* Map index → video file. Files should be short (5-8s) low-bitrate loops.
-   If a file is absent the static image shows through (natural fallback).    */
-const TEMPLATE_VIDEOS = [
-  "/videos/templates/design.mp4",
-  "/videos/templates/dev.mp4",
-  "/videos/templates/marketing.mp4",
-  "/videos/templates/consulting.mp4",
-  "/videos/templates/photo.mp4",
-  "/videos/templates/translation.mp4",
-  "/videos/templates/tutoring.mp4",
-  "/videos/templates/logistics.mp4",
-  "/videos/templates/other.mp4",
-];
+const AMBIENT_VIDEO = "/videos/ambient-rain-bg.mp4";
 
 const TEMPLATE_IMAGES = [
   "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop",
@@ -247,71 +235,68 @@ const cardVariants = {
 /* ── TemplateCard ─────────────────────────────────────────────────────────── */
 
 function TemplateCard({
-  item, index, videoSrc, fallbackSrc, href, label,
+  item, index, fallbackSrc, href, label,
 }: {
   item: { name: string };
   index: number;
-  videoSrc: string;
   fallbackSrc: string;
   href: string;
   label: string;
 }) {
-  const cardRef  = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const loaded   = useRef(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    const card  = cardRef.current;
-    if (!video || !card) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!loaded.current) {
-            loaded.current = true;
-            video.src = videoSrc; // lazy-load: only fetch when visible
-          }
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      },
-      { threshold: 0.25 },
-    );
-    observer.observe(card);
-    return () => observer.disconnect();
-  }, [videoSrc]);
+    if (!video) return;
+    if (hovered) {
+      if (!loaded.current) {
+        loaded.current = true;
+        video.src = AMBIENT_VIDEO;
+      }
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [hovered]);
 
   return (
     <motion.div variants={cardVariants}>
       <div
-        ref={cardRef}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-lg hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 sm:rounded-[28px] transition-shadow duration-300"
       >
         {/* Media */}
         <div className="relative h-36 overflow-hidden sm:h-52">
-          {/* Static image — always visible, acts as fallback when video absent */}
+
+          {/* Static image */}
           <img
             src={fallbackSrc}
             alt={item.name}
-            className="absolute inset-0 h-full w-full object-cover grayscale-60 transition-all duration-500 group-hover:scale-[1.07] group-hover:grayscale-0"
+            className="absolute inset-0 h-full w-full object-cover grayscale-60 transition-all duration-600 group-hover:scale-[1.06] group-hover:grayscale-0"
           />
-          {/* Video — sits on top, revealed when loaded; transparent otherwise */}
+
+          {/* Ambient video overlay — fades in on hover via mix-blend */}
           <video
             ref={videoRef}
             muted loop playsInline preload="none"
-            className="absolute inset-0 h-full w-full object-cover grayscale-60 transition-all duration-500 group-hover:scale-[1.07] group-hover:grayscale-0"
+            className="absolute inset-0 h-full w-full object-cover mix-blend-overlay opacity-0 transition-opacity duration-600 group-hover:opacity-80"
           />
-          {/* Shimmer */}
-          <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/18 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full pointer-events-none" />
+
+          {/* Shimmer sweep */}
+          <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full pointer-events-none" />
+
           {/* Bottom gradient */}
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
+
           {/* Badge */}
           <div className="absolute top-2.5 right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm text-[9px] font-black text-white/60 transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-110">
             {String(index + 1).padStart(2, "0")}
           </div>
         </div>
+
         {/* Content */}
         <div className="px-4 pb-4 pt-2.5">
           <h4 className="text-sm font-black leading-tight transition-colors duration-200 group-hover:text-primary">
@@ -549,7 +534,6 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
                   key={i}
                   item={item}
                   index={i}
-                  videoSrc={TEMPLATE_VIDEOS[i] ?? ""}
                   fallbackSrc={TEMPLATE_IMAGES[i] ?? TEMPLATE_IMAGES[0]}
                   href={`/contracts/new?${params.toString()}`}
                   label={lang === "uz" ? "Tanlash" : "Выбрать"}
