@@ -136,7 +136,8 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 pb-20 sm:px-6">
+      <section className="bg-background border-t border-border/60">
+      <div className="container mx-auto px-4 pb-20 pt-16 sm:px-6">
         <div className="grid gap-5 sm:gap-8 md:grid-cols-3">
           {t.features.map((feature, i) => (
             <motion.div
@@ -156,7 +157,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
             </motion.div>
           ))}
         </div>
-
+      </div>
       </section>
 
       {/* ── SCROLL SCRUB A: Ishonchga asoslangan kelishuv ──────── */}
