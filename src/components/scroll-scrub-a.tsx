@@ -46,6 +46,12 @@ export function ScrollScrubA({ lang }: { lang: Language }) {
     <div ref={sectionRef} className="relative" style={{ minHeight: "250vh" }} data-scroll-cursor>
       <div className="sticky top-0 h-screen overflow-hidden bg-[#0a1410]">
 
+        {/* Top fade — blends with hero above */}
+        <div
+          className="absolute top-0 left-0 right-0 h-32 z-20 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, #0a1410 0%, transparent 100%)" }}
+        />
+
         {/* ── MOBILE: autoplay loop ── */}
         <div className="md:hidden relative h-full w-full">
           {!videoError && (

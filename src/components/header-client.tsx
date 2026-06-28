@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ThemeToggle } from "./theme-toggle";
 import { NotificationBell } from "./notification-bell";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
@@ -68,8 +67,6 @@ export function HeaderClient({ user, lang, pendingContracts }: { user: any, lang
                     Ru
                   </button>
                 </div>
-
-                <ThemeToggle />
 
                 {user ? (
                   <>
