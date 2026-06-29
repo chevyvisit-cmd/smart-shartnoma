@@ -75,24 +75,24 @@ export async function sendSmsCode(phone: string) {
   const code = Math.floor(1000 + Math.random() * 9000).toString();
   const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
+  const isExistingUser = !!(await findUserByPhone(normalized));
+
   await db.phoneVerification.upsert({
     where: { phone: normalized },
     update: { code, expiresAt },
     create: { phone: normalized, code, expiresAt },
   });
 
-  // Try SMS (if credentials configured)
   try {
     await sendSms(normalized, code);
   } catch {
-    // SMS failed — user can still get code via Telegram bot
-    console.log(`SMS failed or not configured. Phone: ${normalized}, Code: ${code}`);
+    console.log(`SMS unavailable. Phone: ${normalized}, Code: ${code}`);
   }
 
-  return { success: true };
+  return { success: true, isExistingUser };
 }
 
-export async function verifySmsCode(phone: string, code: string, userData: any) {
+export async function verifySmsCode(phone: string, code: string, userData: { name: string; phone: string; pinfl: string }) {
   const normalized = normalizePhone(phone);
 
   const record = await db.phoneVerification.findUnique({ where: { phone: normalized } });
@@ -353,7 +353,7 @@ export async function updateProfile(name: string) {
     });
     revalidatePath("/profile");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: "Ma'lumotlarni saqlashda xatolik" };
   }
 }
@@ -369,7 +369,7 @@ export async function updateProfileImage(imageUrl: string) {
     });
     revalidatePath("/profile");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: "Rasmni saqlashda xatolik" };
   }
 }
