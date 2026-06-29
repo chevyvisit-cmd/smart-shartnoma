@@ -44,6 +44,7 @@ export function NewContractClient({
     recipientPhone: "",
     recipientPinfl: "",
     content: prefillContent,
+    type: "KONTRAKT" as "KONTRAKT" | "DOGOVOR",
   });
   const [terms, setTerms] = useState<string[]>(prefillTerms);
 
@@ -173,6 +174,41 @@ export function NewContractClient({
             </div>
 
             <form onSubmit={handleAction} className="space-y-6">
+
+              {/* Hujjat turi */}
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
+                  {uz ? "Hujjat turi" : "Тип документа"}
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {(["KONTRAKT", "DOGOVOR"] as const).map((tp) => {
+                    const isSelected = formData.type === tp;
+                    return (
+                      <button
+                        key={tp}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, type: tp })}
+                        className={`relative rounded-2xl border px-4 py-3 text-left transition-all ${
+                          isSelected
+                            ? tp === "KONTRAKT"
+                              ? "border-primary/60 bg-primary/10 text-primary"
+                              : "border-blue-500/60 bg-blue-500/10 text-blue-400"
+                            : "border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10"
+                        }`}
+                      >
+                        <input type="hidden" name="type" value={formData.type} />
+                        <p className="text-xs font-black uppercase tracking-widest">{tp}</p>
+                        <p className="mt-0.5 text-[10px] opacity-70">
+                          {tp === "KONTRAKT"
+                            ? (uz ? "Asosiy shartnoma" : "Основной договор")
+                            : (uz ? "Qo'shimcha kelishuv" : "Дополнительное соглашение")}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="group space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-1">{t.titleLabel}</label>
@@ -386,7 +422,7 @@ export function NewContractClient({
                         )}
                       </div>
                       <div className="h-px bg-white/10" />
-                      <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                      <p className="whitespace-pre-wrap wrap-break-word overflow-hidden text-muted-foreground leading-relaxed">
                         {formData.content || t.contentPlaceholder}
                       </p>
                       {filledTerms.length > 0 && (
