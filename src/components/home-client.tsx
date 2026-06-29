@@ -158,13 +158,13 @@ function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlay
           {/* ── RIGHT: Key points + ambient video background ── */}
           <div className="relative overflow-hidden rounded-3xl">
 
-            {/* Ambient video — desktop only, very low opacity, autoplay+loop (not scroll-scrubbed) */}
+            {/* Ambient video — desktop only, very low opacity, autoplay+loop */}
             <video
               autoPlay muted loop playsInline
               className="hidden md:block absolute inset-0 h-full w-full object-cover opacity-[0.18] pointer-events-none select-none"
               aria-hidden
             >
-              <source src="/videos/ambient-bg.mp4" type="video/mp4" />
+              <source src="/videos/ambient-rain-bg.mp4" type="video/mp4" />
             </video>
             {/* Edge fade so the video blends softly into the background */}
             <div
@@ -210,6 +210,18 @@ function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlay
 
 const AMBIENT_VIDEO = "/videos/ambient-rain-bg.mp4";
 
+const TEMPLATE_VIDEOS: (string | null)[] = [
+  "/videos/templates/design.mp4",
+  "/videos/templates/dev.mp4",
+  "/videos/templates/marketing.mp4",
+  "/videos/templates/consulting.mp4",
+  "/videos/templates/photo.mp4",
+  "/videos/templates/translation.mp4",
+  "/videos/templates/tutoring.mp4",
+  "/videos/templates/logistics.mp4",
+  "/videos/templates/other.mp4",
+];
+
 const TEMPLATE_IMAGES = [
   "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop",
@@ -235,55 +247,76 @@ const cardVariants = {
 /* ── TemplateCard ─────────────────────────────────────────────────────────── */
 
 function TemplateCard({
-  item, index, fallbackSrc, href, label,
+  item, index, videoSrc, fallbackSrc, href, label,
 }: {
   item: { name: string };
   index: number;
+  videoSrc: string | null;
   fallbackSrc: string;
   href: string;
   label: string;
 }) {
+  const cardRef  = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const loaded   = useRef(false);
-  const [hovered, setHovered] = useState(false);
 
+  /* IntersectionObserver — play when card is visible, pause when not */
   useEffect(() => {
+    if (!videoSrc) return;
     const video = videoRef.current;
-    if (!video) return;
-    if (hovered) {
-      if (!loaded.current) {
-        loaded.current = true;
-        video.src = AMBIENT_VIDEO;
-      }
-      video.play().catch(() => {});
-    } else {
-      video.pause();
-    }
-  }, [hovered]);
+    const card  = cardRef.current;
+    if (!video || !card) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!loaded.current) {
+            loaded.current = true;
+            video.src = videoSrc;
+          }
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [videoSrc]);
 
   return (
     <motion.div variants={cardVariants}>
       <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        ref={cardRef}
         className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-lg hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 sm:rounded-[28px] transition-shadow duration-300"
       >
         {/* Media */}
         <div className="relative h-36 overflow-hidden sm:h-52">
 
-          {/* Static image */}
+          {/* Static image — always visible, fallback when no video */}
           <img
             src={fallbackSrc}
             alt={item.name}
-            className="absolute inset-0 h-full w-full object-cover grayscale-60 transition-all duration-600 group-hover:scale-[1.06] group-hover:grayscale-0"
+            className="absolute inset-0 h-full w-full object-cover grayscale-60 transition-all duration-500 group-hover:scale-[1.06] group-hover:grayscale-0"
           />
 
-          {/* Ambient video overlay — fades in on hover via mix-blend */}
+          {/* Per-card video (autoPlay via IntersectionObserver, fallback = image shows through) */}
+          {videoSrc && (
+            <video
+              ref={videoRef}
+              muted loop playsInline preload="none"
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100"
+            />
+          )}
+
+          {/* Ambient overlay on hover — always present, subtle */}
           <video
-            ref={videoRef}
-            muted loop playsInline preload="none"
-            className="absolute inset-0 h-full w-full object-cover mix-blend-overlay opacity-0 transition-opacity duration-600 group-hover:opacity-80"
-          />
+            autoPlay muted loop playsInline
+            className="absolute inset-0 h-full w-full object-cover mix-blend-overlay opacity-0 transition-opacity duration-500 group-hover:opacity-60 pointer-events-none"
+          >
+            <source src={AMBIENT_VIDEO} type="video/mp4" />
+          </video>
 
           {/* Shimmer sweep */}
           <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full pointer-events-none" />
@@ -502,45 +535,61 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
         setVideoLang={setVideoLang} setPlaying={setPlaying} />
 
       {/* ── TEMPLATES ─────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 sm:px-6">
-      <div className="mt-24 mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-14 text-left"
-          >
-            <h2 className="text-3xl font-black tracking-tight sm:text-5xl">{t.templates.title}</h2>
-            <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-xl">{t.templates.subtitle}</p>
-          </motion.div>
+      <section className="relative overflow-hidden">
+        {/* B1: Ambient background video behind entire grid */}
+        <video
+          autoPlay muted loop playsInline
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.14] pointer-events-none select-none"
+          aria-hidden
+        >
+          <source src={AMBIENT_VIDEO} type="video/mp4" />
+        </video>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 120% 100% at 50% 50%, transparent 40%, var(--background) 90%)" }}
+        />
 
-          <motion.div
-            className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-          >
-            {t.templates.items.map((item, i) => {
-              const params = new URLSearchParams({
-                t: String(i),
-                title: item.name,
-                amount: item.amount,
-                content: item.content,
-                terms: JSON.stringify(item.terms),
-              });
-              return (
-                <TemplateCard
-                  key={i}
-                  item={item}
-                  index={i}
-                  fallbackSrc={TEMPLATE_IMAGES[i] ?? TEMPLATE_IMAGES[0]}
-                  href={`/contracts/new?${params.toString()}`}
-                  label={lang === "uz" ? "Tanlash" : "Выбрать"}
-                />
-              );
-            })}
-          </motion.div>
+        <div className="relative z-10 container mx-auto px-4 sm:px-6">
+          <div className="mt-24 mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-14 text-left"
+            >
+              <h2 className="text-3xl font-black tracking-tight sm:text-5xl">{t.templates.title}</h2>
+              <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-xl">{t.templates.subtitle}</p>
+            </motion.div>
+
+            <motion.div
+              className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+            >
+              {t.templates.items.map((item, i) => {
+                const params = new URLSearchParams({
+                  t: String(i),
+                  title: item.name,
+                  amount: item.amount,
+                  content: item.content,
+                  terms: JSON.stringify(item.terms),
+                });
+                return (
+                  <TemplateCard
+                    key={i}
+                    item={item}
+                    index={i}
+                    videoSrc={TEMPLATE_VIDEOS[i] ?? null}
+                    fallbackSrc={TEMPLATE_IMAGES[i] ?? TEMPLATE_IMAGES[0]}
+                    href={`/contracts/new?${params.toString()}`}
+                    label={lang === "uz" ? "Tanlash" : "Выбрать"}
+                  />
+                );
+              })}
+            </motion.div>
+          </div>
         </div>
       </section>
     </div>
