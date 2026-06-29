@@ -30,8 +30,8 @@ async function findUserByPhone(phone: string) {
   });
 }
 
-// Temporary in-memory storage for codes
-const verificationCodes = new Map<string, string>();
+// OTP expiry duration in minutes
+const OTP_TTL_MINUTES = 10;
 
 // ID generator — no confusable chars (0/O, 1/I/L removed)
 const ID_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -73,20 +73,38 @@ export async function logout() {
 export async function sendSmsCode(phone: string) {
   const normalized = normalizePhone(phone);
   const code = Math.floor(1000 + Math.random() * 9000).toString();
-  verificationCodes.set(normalized, code);
-  // Temporarily disabled real SMS
-  // await sendSms(normalized, code);
-  console.log(`BYPASS SMS: Phone: ${normalized}, Code: ${code} (Or use 1234)`);
+  const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
+
+  await db.phoneVerification.upsert({
+    where: { phone: normalized },
+    update: { code, expiresAt },
+    create: { phone: normalized, code, expiresAt },
+  });
+
+  // Try SMS (if credentials configured)
+  try {
+    await sendSms(normalized, code);
+  } catch {
+    // SMS failed — user can still get code via Telegram bot
+    console.log(`SMS failed or not configured. Phone: ${normalized}, Code: ${code}`);
+  }
+
   return { success: true };
 }
 
 export async function verifySmsCode(phone: string, code: string, userData: any) {
   const normalized = normalizePhone(phone);
-  if (!/^\d{4}$/.test(code) && verificationCodes.get(normalized) !== code) {
-    return { error: "Kod noto'g'ri" };
+
+  const record = await db.phoneVerification.findUnique({ where: { phone: normalized } });
+
+  const devBypass = process.env.NODE_ENV !== "production" && code === "1234";
+  const codeMatch = record && record.code === code && record.expiresAt > new Date();
+
+  if (!devBypass && !codeMatch) {
+    return { error: "Kod noto'g'ri yoki muddati tugagan" };
   }
 
-  verificationCodes.delete(normalized);
+  await db.phoneVerification.deleteMany({ where: { phone: normalized } });
 
   try {
     const existing = await findUserByPhone(normalized);

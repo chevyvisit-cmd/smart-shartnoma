@@ -43,6 +43,14 @@ model Payment {
   updatedAt     DateTime @updatedAt
 }
 
+model PhoneVerification {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 model Contract {
   id              String    @id @default(cuid())
   cid             String?   @unique
