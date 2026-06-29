@@ -9,6 +9,8 @@ import { HeroBackground } from "@/components/motion/hero-background";
 import { ScrollScrubA } from "@/components/scroll-scrub-a";
 import { ScrollScrubB } from "@/components/scroll-scrub-b";
 import { ScrollCursor } from "@/components/motion/scroll-cursor";
+import { useAnimatedStrong, useRevealElements } from "@/hooks/use-scroll-animations";
+import { useStaggerReveal } from "@/hooks/use-stagger-reveal";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -27,30 +29,10 @@ interface WhySectionProps {
 }
 
 function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlaying }: WhySectionProps) {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
   const uz = lang === "uz";
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
-  /* Staggered cascade — each point reveals as user scrolls down, hides as they scroll back up */
-  const op01 = useTransform(scrollYProgress, [0.15, 0.30], [0, 1]);
-  const y01  = useTransform(scrollYProgress, [0.15, 0.30], [28, 0]);
-  const op02 = useTransform(scrollYProgress, [0.25, 0.40], [0, 1]);
-  const y02  = useTransform(scrollYProgress, [0.25, 0.40], [28, 0]);
-  const op03 = useTransform(scrollYProgress, [0.35, 0.50], [0, 1]);
-  const y03  = useTransform(scrollYProgress, [0.35, 0.50], [28, 0]);
-  const op04 = useTransform(scrollYProgress, [0.45, 0.60], [0, 1]);
-  const y04  = useTransform(scrollYProgress, [0.45, 0.60], [28, 0]);
-
-  const itemTransforms = [
-    { op: op01, y: y01 },
-    { op: op02, y: y02 },
-    { op: op03, y: y03 },
-    { op: op04, y: y04 },
-  ];
+  useStaggerReveal(cardsRef, ".stagger-item", { threshold: 0.2, staggerDelay: 150 });
 
   const points = uz ? [
     { Icon: Scale,        num: "01", title: "Huquqiy himoya",      desc: "Shartnoma qonun kuchiga ega hujjat bo'lib, nizoli vaziyatlarda sudda asosiy dalil sifatida qabul qilinadi." },
@@ -65,25 +47,22 @@ function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlay
   ];
 
   return (
-    <section ref={sectionRef} className="container mx-auto px-4 sm:px-6">
+    <section className="container mx-auto px-4 sm:px-6">
       <div className="mt-28 mb-20">
 
         {/* Heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-14 text-left"
-        >
-          <h2 className="text-4xl font-black tracking-tight sm:text-6xl">
-            {uz ? "Nima uchun shartnoma?" : "Зачем нужен контракт?"}
+        <div className="mb-14 text-left reveal-hidden">
+          <h2 className="text-4xl font-black tracking-tight sm:text-6xl animated-strong">
+            {uz
+              ? <>Nima uchun <strong>shartnoma</strong>?</>
+              : <>Зачем нужен <strong>контракт</strong>?</>}
           </h2>
           <p className="mt-4 max-w-2xl text-lg font-medium text-muted-foreground sm:text-2xl">
             {uz
               ? "Qisqa video orqali shartnomaning ahamiyatini bilib oling."
               : "Узнайте о важности контракта с помощью короткого видео."}
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid gap-12 lg:grid-cols-2 items-start">
 
@@ -175,13 +154,12 @@ function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlay
               }}
             />
 
-            {/* Scroll-linked key points list */}
-            <div className="relative z-10">
+            {/* Stagger-revealed key points list */}
+            <div ref={cardsRef} className="relative z-10">
               {points.map((point, i) => (
-                <motion.div
+                <div
                   key={i}
-                  style={{ opacity: itemTransforms[i].op, y: itemTransforms[i].y }}
-                  className="group relative flex gap-6 border-b border-border/60 py-8 last:border-0 transition-colors hover:border-primary/30"
+                  className="stagger-item group relative flex gap-6 border-b border-border/60 py-8 last:border-0 transition-colors hover:border-primary/30"
                 >
                   <div className="absolute left-0 top-8 bottom-8 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100" />
 
@@ -196,7 +174,7 @@ function WhySection({ lang, iframeRef, videoLang, playing, setVideoLang, setPlay
                     <p className="mb-2 text-base font-black tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-lg">{point.title}</p>
                     <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{point.desc}</p>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -350,6 +328,11 @@ function TemplateCard({
 
 /* ── HomeClient ─────────────────────────────────────────────────────────── */
 
+const MARQUEE_LABELS = [
+  "Dizayn", "Dasturlash", "Marketing", "Konsalting",
+  "Fotografiya", "Tarjima", "Repetitorlik", "Logistika", "Boshqa",
+];
+
 export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean, lang: Language }) {
   const t = translations[lang].home;
   const [videoLang, setVideoLang] = useState<"uz" | "ru">(lang === "ru" ? "ru" : "uz");
@@ -358,6 +341,9 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
   const heroRef      = useRef<HTMLDivElement>(null);
   const scrubVideoRef = useRef<HTMLVideoElement>(null);
   const [isDesktop, setIsDesktop] = useState(false);
+
+  useAnimatedStrong();
+  useRevealElements();
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -549,17 +535,25 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           style={{ background: "radial-gradient(ellipse 120% 100% at 50% 50%, transparent 40%, var(--background) 90%)" }}
         />
 
+        {/* Marquee strip */}
+        <div className="marquee-wrapper border-y border-border/40 py-3 mb-0 relative z-10">
+          <div className="marquee-track">
+            {[...MARQUEE_LABELS, ...MARQUEE_LABELS].map((label, i) => (
+              <span key={i} className="mx-6 text-xs font-black uppercase tracking-[0.25em] text-muted-foreground/50 whitespace-nowrap">
+                {label} <span className="text-primary/40 mx-2">·</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
         <div className="relative z-10 container mx-auto px-4 sm:px-6">
-          <div className="mt-24 mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mb-14 text-left"
-            >
-              <h2 className="text-3xl font-black tracking-tight sm:text-5xl">{t.templates.title}</h2>
+          <div className="mt-14 mb-16">
+            <div className="mb-14 text-left reveal-hidden">
+              <h2 className="text-3xl font-black tracking-tight sm:text-5xl animated-strong">
+                {t.templates.title}
+              </h2>
               <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-xl">{t.templates.subtitle}</p>
-            </motion.div>
+            </div>
 
             <motion.div
               className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4"
