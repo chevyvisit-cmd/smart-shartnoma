@@ -5,15 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { sendSmsCode, verifySmsCode } from "@/lib/actions";
 import {
   User, Phone, Hash, ChevronRight, ArrowLeft,
-  ShieldCheck, CheckCircle2, Mail, RefreshCw, AlertCircle,
+  ShieldCheck, CheckCircle2, Mail, Send, RefreshCw, AlertCircle,
 } from "lucide-react";
 import { Language } from "@/lib/translations";
 import Link from "next/link";
+
+type Method = "gmail" | "telegram";
 
 export function RegisterClient({ lang }: { lang: Language }) {
   const uz = lang === "uz";
 
   const [step, setStep]               = useState<1 | 2>(1);
+  const [method, setMethod]           = useState<Method>("gmail");
   const [isExisting, setIsExisting]   = useState(false);
   const [userData, setUserData]       = useState({ name: "", phone: "", pinfl: "", email: "" });
   const [code, setCode]               = useState("");
@@ -23,7 +26,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   /* ── Client-side field validation ── */
-  function validateFields(data: typeof userData): Record<string, string> {
+  function validateFields(data: typeof userData, m: Method): Record<string, string> {
     const errs: Record<string, string> = {};
     const digits = data.phone.replace(/\D/g, "");
     if (digits.length < 9 || digits.length > 12) {
@@ -39,7 +42,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
     if (data.pinfl && /\D/.test(data.pinfl)) {
       errs.pinfl = uz ? "JShShIR faqat raqamlardan iborat" : "ПИНФЛ содержит только цифры";
     }
-    if (!data.email.includes("@")) {
+    if (m === "gmail" && !data.email.includes("@")) {
       errs.email = uz ? "Email manzil noto'g'ri" : "Неверный email адрес";
     }
     return errs;
@@ -51,21 +54,22 @@ export function RegisterClient({ lang }: { lang: Language }) {
     setError("");
 
     const form = e.currentTarget;
+    const emailEl = form.elements.namedItem("email") as HTMLInputElement | null;
     const data = {
       name:  (form.elements.namedItem("name")  as HTMLInputElement).value.trim(),
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim(),
       pinfl: (form.elements.namedItem("pinfl") as HTMLInputElement)?.value.replace(/\D/g, "") ?? "",
-      email: (form.elements.namedItem("email") as HTMLInputElement).value.trim().toLowerCase(),
+      email: emailEl?.value.trim().toLowerCase() ?? "",
     };
 
-    const errs = validateFields(data);
+    const errs = validateFields(data, method);
     if (Object.keys(errs).length) { setFieldErrors(errs); return; }
     setFieldErrors({});
     setUserData(data);
     setIsLoading(true);
 
     try {
-      const res = await sendSmsCode(data.phone, data.email);
+      const res = await sendSmsCode(data.phone, method, method === "gmail" ? data.email : undefined);
       if ("error" in res) {
         setError(res.error);
         return;
@@ -100,7 +104,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setError("");
-    await sendSmsCode(userData.phone, userData.email);
+    await sendSmsCode(userData.phone, method, method === "gmail" ? userData.email : undefined);
     startResendCooldown();
   };
 
@@ -207,24 +211,73 @@ export function RegisterClient({ lang }: { lang: Language }) {
                   }}
                 />
 
-                {/* Gmail label */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 px-1">
-                    <Mail size={13} className="text-primary" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">
-                      Gmail — {uz ? "kod shu manzilga yuboriladi" : "код придёт на этот адрес"}
-                    </span>
-                  </div>
-                  <FieldWithError
-                    icon={<Mail size={18} />}
-                    name="email"
-                    type="email"
-                    placeholder="yourname@gmail.com"
-                    required
-                    inputMode="email"
-                    error={fieldErrors.email}
-                  />
+                {/* Method selector */}
+                <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border dark:border-white/10 bg-secondary/30 dark:bg-white/5 p-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setMethod("gmail")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-black transition-all ${
+                      method === "gmail"
+                        ? "bg-primary text-white shadow-md shadow-primary/30"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Mail size={16} />
+                    Gmail
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMethod("telegram")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-black transition-all ${
+                      method === "telegram"
+                        ? "bg-[#229ED9] text-white shadow-md shadow-blue-400/30"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Send size={15} />
+                    Telegram
+                  </button>
                 </div>
+
+                {/* Conditional: email field or Telegram info */}
+                <AnimatePresence mode="wait">
+                  {method === "gmail" ? (
+                    <motion.div
+                      key="gmail"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <FieldWithError
+                        icon={<Mail size={18} />}
+                        name="email"
+                        type="email"
+                        placeholder="yourname@gmail.com"
+                        required
+                        inputMode="email"
+                        error={fieldErrors.email}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="telegram"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex items-start gap-3 rounded-2xl border border-blue-400/20 bg-blue-500/8 px-4 py-3.5 text-sm">
+                        <Send size={16} className="mt-0.5 shrink-0 text-blue-400" />
+                        <p className="text-muted-foreground leading-relaxed">
+                          {uz
+                            ? <><span className="font-black text-blue-400">@SmartShartnoma_bot</span> ga kiring, telefon raqamni ulashing — bot kodni yuboradi.</>
+                            : <>Зайдите в <span className="font-black text-blue-400">@SmartShartnoma_bot</span>, поделитесь номером — бот пришлёт код.</>}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <FieldWithError
                   icon={<Hash size={18} />}
@@ -248,7 +301,9 @@ export function RegisterClient({ lang }: { lang: Language }) {
                   <span className="relative z-10 flex items-center gap-2">
                     {isLoading
                       ? (uz ? "Yuklanmoqda..." : "Загрузка...")
-                      : (uz ? "Kodni Gmailga yuborish" : "Отправить код на Gmail")}
+                      : method === "gmail"
+                        ? (uz ? "Kodni Gmailga yuborish" : "Отправить код на Gmail")
+                        : (uz ? "Davom etish" : "Продолжить")}
                     {!isLoading && <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />}
                   </span>
                   <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />

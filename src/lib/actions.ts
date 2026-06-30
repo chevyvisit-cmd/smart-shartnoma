@@ -85,11 +85,11 @@ export async function logout() {
 
 export async function sendSmsCode(
   phone: string,
+  method: "gmail" | "telegram",
   email?: string,
 ): Promise<{ success: true; isExistingUser: boolean } | { error: string }> {
   const normalized = normalizePhone(phone);
 
-  // Server-side phone validation
   const digits = normalized.replace(/\D/g, "");
   if (digits.length < 9 || digits.length > 12) {
     return { error: "Telefon raqami noto'g'ri (9–12 ta raqam)" };
@@ -105,21 +105,22 @@ export async function sendSmsCode(
     create: { phone: normalized, code, expiresAt },
   });
 
-  // Send email
-  if (email) {
+  if (method === "gmail") {
+    if (!email) return { error: "Email manzil kiritilmagan" };
     try {
       const { sendEmail } = await import("./email");
       await sendEmail(email, code);
     } catch {
       console.log(`Email unavailable. Phone: ${normalized}, Code: ${code}`);
     }
-  }
-
-  // Also send via Telegram if user has chatId saved
-  const existingUser = await findUserByPhone(normalized);
-  const chatId = (existingUser as Record<string, unknown>)?.telegramChatId as string | null;
-  if (chatId) {
-    await sendTelegramOtp(chatId, code);
+  } else {
+    // Telegram: send if chatId exists, otherwise user must go to bot themselves
+    const existingUser = await findUserByPhone(normalized);
+    const chatId = (existingUser as Record<string, unknown>)?.telegramChatId as string | null;
+    if (chatId) {
+      await sendTelegramOtp(chatId, code);
+    }
+    // If no chatId: user will go to bot, share phone → bot finds existing OTP and sends it
   }
 
   return { success: true, isExistingUser };
