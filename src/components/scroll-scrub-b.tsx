@@ -153,10 +153,9 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
             <div
               className="relative w-full overflow-hidden shadow-2xl"
               style={{
-                aspectRatio: "4 / 3",
-                borderRadius: "18px",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(45,106,79,0.07)",
+                aspectRatio: "3 / 4",
+                clipPath: "polygon(52px 0, 100% 0, 100% calc(100% - 52px), calc(100% - 52px) 100%, 0 100%, 0 52px)",
+                boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(45,106,79,0.12)",
               }}
             >
               <video
