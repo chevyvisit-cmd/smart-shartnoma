@@ -135,9 +135,9 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
           </div>
 
           {/* ── RIGHT: Video panel — always autoplay/loop, no scroll control ── */}
-          <div className="flex w-full shrink-0 items-center justify-center p-5 md:w-1/2 md:p-10 lg:p-14">
+          <div className="flex w-full shrink-0 items-center justify-center p-4 md:w-1/2 md:p-6 lg:p-8">
             <div
-              className="relative w-[90%] overflow-hidden shadow-2xl"
+              className="relative w-full overflow-hidden shadow-2xl"
               style={{
                 aspectRatio: "4 / 3",
                 borderRadius: "18px",
