@@ -4,32 +4,41 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendLoginCode, verifyLoginCode } from "@/lib/actions";
 import {
-  Phone, Mail, ChevronRight, ArrowLeft, ShieldCheck,
-  CheckCircle2, RefreshCw, AlertCircle, LogIn,
+  Phone, Mail, Send, ChevronRight, ArrowLeft,
+  ShieldCheck, CheckCircle2, RefreshCw, AlertCircle, LogIn,
 } from "lucide-react";
 import { Language } from "@/lib/translations";
 import Link from "next/link";
 
+type Method = "gmail" | "telegram";
+
 export function LoginClient({ lang }: { lang: Language }) {
   const uz = lang === "uz";
 
-  const [step, setStep]     = useState<1 | 2>(1);
-  const [phone, setPhone]   = useState("");
-  const [email, setEmail]   = useState("");
-  const [code, setCode]     = useState("");
+  const [step, setStep]       = useState<1 | 2>(1);
+  const [phone, setPhone]     = useState("");
+  const [email, setEmail]     = useState("");
+  const [method, setMethod]   = useState<Method>("gmail");
+  const [code, setCode]       = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError]   = useState("");
+  const [error, setError]     = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  /* ── Step 1: request code ── */
+  /* ── Step 1: send code ── */
   const handleSendCode = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    if (method === "gmail" && !email.trim().includes("@")) {
+      setError(uz ? "Email manzil noto'g'ri" : "Неверный email адрес");
+      return;
+    }
     setIsLoading(true);
-
-    const res = await sendLoginCode(phone.trim(), email.trim() || undefined);
+    const res = await sendLoginCode(
+      phone.trim(),
+      method,
+      method === "gmail" ? email.trim() : undefined,
+    );
     setIsLoading(false);
-
     if ("error" in res) {
       setError(res.error);
     } else {
@@ -43,21 +52,20 @@ export function LoginClient({ lang }: { lang: Language }) {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
     const res = await verifyLoginCode(phone.trim(), code);
     setIsLoading(false);
-
-    if ("error" in res) {
-      setError(res.error);
-    } else {
-      window.location.href = "/dashboard";
-    }
+    if ("error" in res) setError(res.error);
+    else window.location.href = "/dashboard";
   };
 
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setError("");
-    await sendLoginCode(phone.trim(), email.trim() || undefined);
+    await sendLoginCode(
+      phone.trim(),
+      method,
+      method === "gmail" ? email.trim() : undefined,
+    );
     startResendCooldown();
   };
 
@@ -71,14 +79,18 @@ export function LoginClient({ lang }: { lang: Language }) {
     }, 1000);
   }
 
+  const step2Desc = method === "gmail"
+    ? (uz ? `Kod ${email} manziliga yuborildi` : `Код отправлен на ${email}`)
+    : (uz ? "Kod Telegram botga yuborildi" : "Код отправлен в Telegram бот");
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:py-20">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-md overflow-hidden rounded-[32px] border border-border/50 dark:border-white/10 bg-background/80 dark:bg-background/40 backdrop-blur-2xl shadow-2xl"
+        className="relative w-full max-w-md overflow-hidden rounded-4xl border border-border/50 dark:border-white/10 bg-background/80 dark:bg-background/40 backdrop-blur-2xl shadow-2xl"
       >
         <div className="p-6 sm:p-10">
 
@@ -92,7 +104,6 @@ export function LoginClient({ lang }: { lang: Language }) {
             >
               {step === 1 ? <LogIn size={30} /> : <ShieldCheck size={30} />}
             </motion.div>
-
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
               {step === 1
                 ? (uz ? "Tizimga kirish" : "Войти в систему")
@@ -100,10 +111,8 @@ export function LoginClient({ lang }: { lang: Language }) {
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {step === 1
-                ? (uz ? "Ro'yxatdan o'tgan telefon raqamingizni kiriting" : "Введите зарегистрированный номер телефона")
-                : email
-                  ? (uz ? `Kod ${email} manziliga yuborildi` : `Код отправлен на ${email}`)
-                  : (uz ? `Kod ${phone} ga bog'liq emailga yuborildi` : `Код отправлен на email, привязанный к ${phone}`)}
+                ? (uz ? "Telefon raqamingizni kiriting" : "Введите ваш номер телефона")
+                : step2Desc}
             </p>
           </div>
 
@@ -140,6 +149,7 @@ export function LoginClient({ lang }: { lang: Language }) {
                 onSubmit={handleSendCode}
                 className="space-y-4"
               >
+                {/* Phone */}
                 <div className="group relative">
                   <Phone className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={18} />
                   <input
@@ -157,17 +167,75 @@ export function LoginClient({ lang }: { lang: Language }) {
                   />
                 </div>
 
-                <div className="group relative">
-                  <Mail className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={18} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={uz ? "Email (ixtiyoriy)" : "Email (необязательно)"}
-                    inputMode="email"
-                    className="w-full rounded-2xl border border-border dark:border-white/10 bg-secondary/50 dark:bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/8 focus:ring-4 focus:ring-primary/10"
-                  />
+                {/* Method selector */}
+                <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border dark:border-white/10 bg-secondary/30 dark:bg-white/5 p-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setMethod("gmail")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-black transition-all ${
+                      method === "gmail"
+                        ? "bg-primary text-white shadow-md shadow-primary/30"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Mail size={16} />
+                    Gmail
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMethod("telegram")}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-black transition-all ${
+                      method === "telegram"
+                        ? "bg-[#229ED9] text-white shadow-md shadow-blue-400/30"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Send size={15} />
+                    Telegram
+                  </button>
                 </div>
+
+                {/* Conditional extra field */}
+                <AnimatePresence mode="wait">
+                  {method === "gmail" ? (
+                    <motion.div
+                      key="gmail-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="group relative">
+                        <Mail className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={18} />
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="email@example.com"
+                          inputMode="email"
+                          className="w-full rounded-2xl border border-border dark:border-white/10 bg-secondary/50 dark:bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/8 focus:ring-4 focus:ring-primary/10"
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="telegram-info"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex items-start gap-3 rounded-2xl border border-blue-400/20 bg-blue-500/8 px-4 py-3.5 text-sm">
+                        <Send size={16} className="mt-0.5 shrink-0 text-blue-400" />
+                        <p className="text-muted-foreground leading-relaxed">
+                          {uz
+                            ? <>Kod <span className="font-black text-blue-400">@SmartShartnoma_bot</span> orqali keladi. Botni avval ishga tushirgan bo'lishingiz kerak.</>
+                            : <>Код придёт через <span className="font-black text-blue-400">@SmartShartnoma_bot</span>. Нужно заранее запустить бота.</>}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <button
                   type="submit"
@@ -201,6 +269,29 @@ export function LoginClient({ lang }: { lang: Language }) {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-5"
               >
+                {/* Channel badge */}
+                <div className={`flex items-center gap-3 rounded-2xl border px-5 py-4 ${
+                  method === "gmail"
+                    ? "border-primary/30 bg-primary/8"
+                    : "border-blue-400/30 bg-blue-500/8"
+                }`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg ${
+                    method === "gmail" ? "bg-primary shadow-primary/30" : "bg-[#229ED9] shadow-blue-400/30"
+                  }`}>
+                    {method === "gmail" ? <Mail size={18} /> : <Send size={17} />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-foreground">
+                      {method === "gmail"
+                        ? (uz ? "Email xatingizni oching" : "Откройте вашу почту")
+                        : (uz ? "Telegram botni oching" : "Откройте Telegram бот")}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {method === "gmail" ? email : "@SmartShartnoma_bot"}
+                    </p>
+                  </div>
+                </div>
+
                 <form onSubmit={handleVerify} className="space-y-4">
                   <div className="group relative">
                     <ShieldCheck className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={20} />
@@ -235,7 +326,6 @@ export function LoginClient({ lang }: { lang: Language }) {
                     <ArrowLeft size={14} />
                     {uz ? "Orqaga" : "Назад"}
                   </button>
-
                   <button
                     type="button"
                     onClick={handleResend}

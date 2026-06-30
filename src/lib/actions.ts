@@ -117,7 +117,9 @@ export async function sendSmsCode(
 
   // Also send via Telegram if user has chatId saved
   const existingUser = await findUserByPhone(normalized);
+  // @ts-expect-error — telegramChatId exists after prisma generate (IDE cache stale)
   if (existingUser?.telegramChatId) {
+    // @ts-expect-error -- telegramChatId added via prisma generate
     await sendTelegramOtp(existingUser.telegramChatId, code);
   }
 
@@ -128,6 +130,7 @@ export async function sendSmsCode(
 
 export async function sendLoginCode(
   phone: string,
+  method: "gmail" | "telegram",
   email?: string,
 ): Promise<{ success: true } | { error: string }> {
   const normalized = normalizePhone(phone);
@@ -144,19 +147,21 @@ export async function sendLoginCode(
     create: { phone: normalized, code, expiresAt: new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000) },
   });
 
-  // Send via email — prefer the one the user typed, fallback to saved
-  const targetEmail = email || user.email;
-  if (targetEmail) {
+  if (method === "gmail") {
+    const targetEmail = email || user.email;
+    if (!targetEmail) return { error: "Email manzil topilmadi" };
     try {
       const { sendEmail } = await import("./email");
       await sendEmail(targetEmail, code);
     } catch {
       console.log(`Email unavailable. Phone: ${normalized}, Code: ${code}`);
     }
-  }
-
-  // Also send via Telegram if chatId is saved
-  if (user.telegramChatId) {
+  } else {
+    // @ts-expect-error — telegramChatId exists after prisma generate (IDE cache stale)
+    if (!user.telegramChatId) {
+      return { error: "Telegram bot bilan bog'lanmagan. Avval @SmartShartnoma_bot ni ishga tushiring." };
+    }
+    // @ts-expect-error
     await sendTelegramOtp(user.telegramChatId, code);
   }
 
