@@ -11,6 +11,7 @@ import { ScrollCursor } from "@/components/motion/scroll-cursor";
 import { useAnimatedStrong, useRevealElements } from "@/hooks/use-scroll-animations";
 import { useStaggerReveal } from "@/hooks/use-stagger-reveal";
 import HeroSection from "@/components/HeroSection";
+import { HelpButton } from "@/components/help-button";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -425,6 +426,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
           </div>
         </div>
       </section>
+      <HelpButton />
     </div>
   );
 }
