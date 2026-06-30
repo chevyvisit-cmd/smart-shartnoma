@@ -3,10 +3,23 @@
 import { db } from "./db";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { sendSms } from "./sms";
 import { cookies } from "next/headers";
 import { Language } from "./translations";
 import { checkQuota, FREE_CONTRACTS_LIMIT, PRICE_PER_CONTRACT } from "./config";
+
+async function sendTelegramOtp(chatId: string, code: string) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return;
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: `✅ *Smart-Shartnoma* tasdiqlash kodi:\n\n\`${code}\`\n\n_Kod 10 daqiqa amal qiladi._`,
+      parse_mode: "Markdown",
+    }),
+  }).catch(() => {});
+}
 
 class PaymentRequiredError extends Error {
   constructor() { super("payment_required"); }
@@ -70,11 +83,20 @@ export async function logout() {
   redirect("/");
 }
 
-export async function sendSmsCode(phone: string) {
+export async function sendSmsCode(
+  phone: string,
+  email?: string,
+): Promise<{ success: true; isExistingUser: boolean } | { error: string }> {
   const normalized = normalizePhone(phone);
+
+  // Server-side phone validation
+  const digits = normalized.replace(/\D/g, "");
+  if (digits.length < 9 || digits.length > 12) {
+    return { error: "Telefon raqami noto'g'ri (9–12 ta raqam)" };
+  }
+
   const code = Math.floor(1000 + Math.random() * 9000).toString();
   const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
-
   const isExistingUser = !!(await findUserByPhone(normalized));
 
   await db.phoneVerification.upsert({
@@ -83,16 +105,95 @@ export async function sendSmsCode(phone: string) {
     create: { phone: normalized, code, expiresAt },
   });
 
-  try {
-    await sendSms(normalized, code);
-  } catch {
-    console.log(`SMS unavailable. Phone: ${normalized}, Code: ${code}`);
+  // Send email
+  if (email) {
+    try {
+      const { sendEmail } = await import("./email");
+      await sendEmail(email, code);
+    } catch {
+      console.log(`Email unavailable. Phone: ${normalized}, Code: ${code}`);
+    }
+  }
+
+  // Also send via Telegram if user has chatId saved
+  const existingUser = await findUserByPhone(normalized);
+  if (existingUser?.telegramChatId) {
+    await sendTelegramOtp(existingUser.telegramChatId, code);
   }
 
   return { success: true, isExistingUser };
 }
 
-export async function verifySmsCode(phone: string, code: string, userData: { name: string; phone: string; pinfl: string }) {
+// ── Login flow (existing users only) ────────────────────────
+
+export async function sendLoginCode(
+  phone: string,
+): Promise<{ success: true } | { error: string }> {
+  const normalized = normalizePhone(phone);
+  const user = await findUserByPhone(normalized);
+
+  if (!user) {
+    return { error: "Bu telefon raqami ro'yxatdan o'tmagan. Avval ro'yxatdan o'ting." };
+  }
+
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  await db.phoneVerification.upsert({
+    where: { phone: normalized },
+    update: { code, expiresAt: new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000) },
+    create: { phone: normalized, code, expiresAt: new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000) },
+  });
+
+  // Send via email
+  if (user.email) {
+    try {
+      const { sendEmail } = await import("./email");
+      await sendEmail(user.email, code);
+    } catch {
+      console.log(`Email unavailable. Phone: ${normalized}, Code: ${code}`);
+    }
+  }
+
+  // Also send via Telegram if chatId is saved
+  if (user.telegramChatId) {
+    await sendTelegramOtp(user.telegramChatId, code);
+  }
+
+  return { success: true };
+}
+
+export async function verifyLoginCode(
+  phone: string,
+  code: string,
+): Promise<{ success: true } | { error: string }> {
+  const normalized = normalizePhone(phone);
+  const record = await db.phoneVerification.findUnique({ where: { phone: normalized } });
+  const devBypass = process.env.NODE_ENV !== "production" && code === "1234";
+  const codeMatch = record && record.code === code && record.expiresAt > new Date();
+
+  if (!devBypass && !codeMatch) {
+    return { error: "Kod noto'g'ri yoki muddati tugagan" };
+  }
+
+  await db.phoneVerification.deleteMany({ where: { phone: normalized } });
+
+  const user = await findUserByPhone(normalized);
+  if (!user) return { error: "Foydalanuvchi topilmadi" };
+
+  const cookieStore = await cookies();
+  cookieStore.set("user_session", user.id, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+
+  return { success: true };
+}
+
+// ── Registration OTP verification ────────────────────────────
+
+export async function verifySmsCode(phone: string, code: string, userData: { name: string; phone: string; pinfl: string; email?: string }) {
   const normalized = normalizePhone(phone);
 
   const record = await db.phoneVerification.findUnique({ where: { phone: normalized } });
@@ -154,6 +255,7 @@ export async function createContract(formData: FormData) {
   const amountInput  = formData.get("amount");
   const amount       = amountInput ? parseFloat(amountInput as string) : 0;
   const content      = formData.get("content") as string;
+  const type         = (formData.get("type") as string) || "KONTRAKT";
   const recipientPhone = (formData.get("recipientPhone") as string)?.trim() || null;
   const recipientPinfl = (formData.get("recipientPinfl") as string)?.trim() || null;
   const termsRaw     = formData.get("terms") as string;
@@ -181,7 +283,7 @@ export async function createContract(formData: FormData) {
       await tx.contract.create({
         data: {
           cid: generateCid(),
-          title, amount, content,
+          title, amount, content, type,
           terms: termsRaw || "[]",
           creatorId: user.id,
           recipientId: recipient?.id ?? null,

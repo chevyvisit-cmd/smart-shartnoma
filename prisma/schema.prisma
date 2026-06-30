@@ -17,8 +17,10 @@ model User {
   uid                 String?   @unique
   name                String?
   phone               String    @unique
+  email               String?   @unique
   pinfl               String?   @unique
   image               String?
+  telegramChatId      String?
   freeContractsUsed   Int       @default(0)
   paidContractCredits Int       @default(0)
   createdAt           DateTime  @default(now())
@@ -57,6 +59,7 @@ model Contract {
   title           String
   content         String
   amount          Float?
+  type            String    @default("KONTRAKT") // "KONTRAKT" | "DOGOVOR"
   status          String    @default("PENDING") // PENDING | SENT | ACCEPTED | REJECTED | SIGNED | CANCELLED
 
   creatorId       String
@@ -69,6 +72,11 @@ model Contract {
   recipientPinfl  String?
 
   terms           String?   @default("[]")
+
+  // Dogovor → Kontrakt parent relation (1-to-many)
+  parentId        String?
+  parent          Contract?  @relation("DogovorParent", fields: [parentId], references: [id])
+  dogovors        Contract[] @relation("DogovorParent")
 
   sentAt          DateTime?
   acceptedAt      DateTime?

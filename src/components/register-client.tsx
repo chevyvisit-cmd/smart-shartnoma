@@ -5,42 +5,72 @@ import { motion, AnimatePresence } from "framer-motion";
 import { sendSmsCode, verifySmsCode } from "@/lib/actions";
 import {
   User, Phone, Hash, ChevronRight, ArrowLeft,
-  ShieldCheck, CheckCircle2, Send, RefreshCw,
+  ShieldCheck, CheckCircle2, Mail, RefreshCw, AlertCircle,
 } from "lucide-react";
-import { translations, Language } from "@/lib/translations";
+import { Language } from "@/lib/translations";
 import Link from "next/link";
 
-const BOT_URL = "https://t.me/SmartShartnoma_bot";
-
 export function RegisterClient({ lang }: { lang: Language }) {
-  const t = translations[lang].auth;
   const uz = lang === "uz";
 
   const [step, setStep]               = useState<1 | 2>(1);
   const [isExisting, setIsExisting]   = useState(false);
-  const [userData, setUserData]       = useState({ name: "", phone: "", pinfl: "" });
+  const [userData, setUserData]       = useState({ name: "", phone: "", pinfl: "", email: "" });
   const [code, setCode]               = useState("");
   const [isLoading, setIsLoading]     = useState(false);
   const [error, setError]             = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  /* ── Client-side field validation ── */
+  function validateFields(data: typeof userData): Record<string, string> {
+    const errs: Record<string, string> = {};
+    const digits = data.phone.replace(/\D/g, "");
+    if (digits.length < 9 || digits.length > 12) {
+      errs.phone = uz
+        ? "Telefon raqami noto'g'ri (9–12 ta raqam)"
+        : "Неверный номер телефона (9–12 цифр)";
+    }
+    if (data.pinfl && data.pinfl.replace(/\D/g, "").length !== 14) {
+      errs.pinfl = uz
+        ? "JShShIR aniq 14 ta raqamdan iborat bo'lishi kerak"
+        : "ПИНФЛ должен содержать ровно 14 цифр";
+    }
+    if (data.pinfl && /\D/.test(data.pinfl)) {
+      errs.pinfl = uz ? "JShShIR faqat raqamlardan iborat" : "ПИНФЛ содержит только цифры";
+    }
+    if (!data.email.includes("@")) {
+      errs.email = uz ? "Email manzil noto'g'ri" : "Неверный email адрес";
+    }
+    return errs;
+  }
+
   /* ── Step 1: send OTP ── */
-  const handleSendCode = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
 
-    const form = e.target as HTMLFormElement;
+    const form = e.currentTarget;
     const data = {
       name:  (form.elements.namedItem("name")  as HTMLInputElement).value.trim(),
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim(),
-      pinfl: (form.elements.namedItem("pinfl") as HTMLInputElement)?.value.trim() ?? "",
+      pinfl: (form.elements.namedItem("pinfl") as HTMLInputElement)?.value.replace(/\D/g, "") ?? "",
+      email: (form.elements.namedItem("email") as HTMLInputElement).value.trim().toLowerCase(),
     };
+
+    const errs = validateFields(data);
+    if (Object.keys(errs).length) { setFieldErrors(errs); return; }
+    setFieldErrors({});
     setUserData(data);
+    setIsLoading(true);
 
     try {
-      const res = await sendSmsCode(data.phone);
-      setIsExisting(!!(res as any).isExistingUser);
+      const res = await sendSmsCode(data.phone, data.email);
+      if ("error" in res) {
+        setError(res.error);
+        return;
+      }
+      setIsExisting(res.isExistingUser);
       setStep(2);
       startResendCooldown();
     } catch {
@@ -51,7 +81,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
   };
 
   /* ── Step 2: verify code ── */
-  const handleVerify = async (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -70,7 +100,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setError("");
-    await sendSmsCode(userData.phone);
+    await sendSmsCode(userData.phone, userData.email);
     startResendCooldown();
   };
 
@@ -86,7 +116,6 @@ export function RegisterClient({ lang }: { lang: Language }) {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:py-20">
-      {/* Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
@@ -112,7 +141,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
                 ? (uz ? "Ro'yxatdan o'tish" : "Регистрация")
                 : isExisting
                   ? (uz ? "Xush kelibsiz!" : "Добро пожаловать!")
-                  : (uz ? "Kodni tasdiqlang" : "Подтвердите код")}
+                  : (uz ? "Emailni tekshiring" : "Проверьте email")}
             </h2>
 
             <p className="mt-3 text-sm text-muted-foreground">
@@ -120,25 +149,26 @@ export function RegisterClient({ lang }: { lang: Language }) {
                 ? (uz ? "Ma'lumotlaringizni kiriting" : "Введите ваши данные")
                 : isExisting
                   ? (uz ? `${userData.phone} raqami bilan hisobingiz topildi` : `Аккаунт с номером ${userData.phone} найден`)
-                  : (uz ? `${userData.phone} raqamiga bog'langan kodni oling` : `Получите код для номера ${userData.phone}`)}
+                  : (uz ? `Kod ${userData.email} manziliga yuborildi` : `Код отправлен на ${userData.email}`)}
             </p>
           </div>
 
           {/* Progress */}
-          <div className="mb-10 flex items-center justify-center gap-2">
+          <div className="mb-8 flex items-center justify-center gap-2">
             <div className={`h-1.5 w-12 rounded-full transition-all duration-500 ${step >= 1 ? "bg-primary" : "bg-border"}`} />
             <div className={`h-1.5 w-12 rounded-full transition-all duration-500 ${step >= 2 ? "bg-primary" : "bg-border"}`} />
           </div>
 
-          {/* Error */}
+          {/* Top-level error */}
           <AnimatePresence>
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="mb-5 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
+                className="mb-5 flex items-start gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
               >
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
                 {error}
               </motion.div>
             )}
@@ -156,14 +186,49 @@ export function RegisterClient({ lang }: { lang: Language }) {
                 onSubmit={handleSendCode}
                 className="space-y-4"
               >
-                <Field icon={<User size={18} />} name="name" placeholder={uz ? "To'liq ismingiz" : "Полное имя"} required />
-                <Field icon={<Phone size={18} />} name="phone" type="tel" placeholder="+998 XX XXX XX XX" required />
                 <Field
+                  icon={<User size={18} />}
+                  name="name"
+                  placeholder={uz ? "To'liq ismingiz" : "Полное имя"}
+                  required
+                />
+
+                <FieldWithError
+                  icon={<Phone size={18} />}
+                  name="phone"
+                  type="tel"
+                  placeholder="+998 XX XXX XX XX"
+                  required
+                  inputMode="tel"
+                  error={fieldErrors.phone}
+                  onInput={(e) => {
+                    const el = e.target as HTMLInputElement;
+                    el.value = el.value.replace(/[^\d\s\+\-\(\)]/g, "");
+                  }}
+                />
+
+                <FieldWithError
+                  icon={<Mail size={18} />}
+                  name="email"
+                  type="email"
+                  placeholder="email@example.com"
+                  required
+                  inputMode="email"
+                  error={fieldErrors.email}
+                />
+
+                <FieldWithError
                   icon={<Hash size={18} />}
                   name="pinfl"
-                  placeholder={uz ? "JShShIR (ixtiyoriy)" : "ИНН (необязательно)"}
+                  placeholder={uz ? "JShShIR — 14 ta raqam (ixtiyoriy)" : "ПИНФЛ — 14 цифр (необязательно)"}
                   required={false}
                   inputMode="numeric"
+                  maxLength={14}
+                  error={fieldErrors.pinfl}
+                  onInput={(e) => {
+                    const el = e.target as HTMLInputElement;
+                    el.value = el.value.replace(/\D/g, "").slice(0, 14);
+                  }}
                 />
 
                 <button
@@ -174,11 +239,18 @@ export function RegisterClient({ lang }: { lang: Language }) {
                   <span className="relative z-10 flex items-center gap-2">
                     {isLoading
                       ? (uz ? "Yuklanmoqda..." : "Загрузка...")
-                      : (uz ? "Kodni olish" : "Получить код")}
+                      : (uz ? "Kodni emailga yuborish" : "Отправить код на email")}
                     {!isLoading && <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />}
                   </span>
                   <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />
                 </button>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  {uz ? "Allaqachon hisob bormi?" : "Уже есть аккаунт?"}{" "}
+                  <Link href="/login" className="font-bold text-primary hover:underline">
+                    {uz ? "Kirish" : "Войти"}
+                  </Link>
+                </p>
               </motion.form>
             )}
 
@@ -191,30 +263,23 @@ export function RegisterClient({ lang }: { lang: Language }) {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-5"
               >
-                {/* Telegram bot card */}
-                <Link
-                  href={BOT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary/8 px-5 py-4 transition-colors hover:bg-primary/15"
-                >
+                {/* Email card */}
+                <div className="flex items-center gap-4 rounded-2xl border border-primary/30 bg-primary/8 px-5 py-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/30">
-                    <Send size={20} />
+                    <Mail size={20} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-black text-foreground">
-                      {uz ? "Telegram bot orqali kodni oling" : "Получите код через Telegram бот"}
+                      {uz ? "Email xatingizni oching" : "Откройте вашу почту"}
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">@SmartShartnoma_bot</p>
+                    <p className="truncate text-xs text-muted-foreground">{userData.email}</p>
                   </div>
-                  <ChevronRight size={16} className="ml-auto shrink-0 text-primary" />
-                </Link>
+                </div>
 
-                {/* How-to hint */}
                 <p className="text-center text-xs text-muted-foreground">
                   {uz
-                    ? "Botga kiring → \"📱 Telefon raqamni ulashish\" tugmasini bosing → kod keladi"
-                    : "Войдите в бот → нажмите \"📱 Поделиться номером\" → получите код"}
+                    ? "Smart-Shartnoma dan kelgan 4 xonali kodni kiriting"
+                    : "Введите 4-значный код из письма Smart-Shartnoma"}
                 </p>
 
                 {/* Code input */}
@@ -223,7 +288,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
                     <ShieldCheck className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={20} />
                     <input
                       value={code}
-                      onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
                       required
                       inputMode="numeric"
                       placeholder={uz ? "4 xonali kod" : "4-значный код"}
@@ -276,15 +341,12 @@ export function RegisterClient({ lang }: { lang: Language }) {
   );
 }
 
-/* ── Reusable input field ────────────────────────────────── */
+/* ── Simple field ─────────────────────────────────────────── */
 function Field({
   icon, name, placeholder, type = "text", required = true, inputMode,
 }: {
-  icon: React.ReactNode;
-  name: string;
-  placeholder: string;
-  type?: string;
-  required?: boolean;
+  icon: React.ReactNode; name: string; placeholder: string;
+  type?: string; required?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   return (
@@ -293,13 +355,54 @@ function Field({
         {icon}
       </div>
       <input
-        name={name}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        inputMode={inputMode}
+        name={name} type={type} required={required}
+        placeholder={placeholder} inputMode={inputMode}
         className="w-full rounded-2xl border border-border dark:border-white/10 bg-secondary/50 dark:bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/8 focus:ring-4 focus:ring-primary/10"
       />
+    </div>
+  );
+}
+
+/* ── Field with inline error ──────────────────────────────── */
+function FieldWithError({
+  icon, name, placeholder, type = "text", required = true,
+  inputMode, maxLength, error, onInput,
+}: {
+  icon: React.ReactNode; name: string; placeholder: string;
+  type?: string; required?: boolean;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  maxLength?: number; error?: string;
+  onInput?: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="group relative">
+        <div className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary">
+          {icon}
+        </div>
+        <input
+          name={name} type={type} required={required}
+          placeholder={placeholder} inputMode={inputMode}
+          maxLength={maxLength} onInput={onInput}
+          className={`w-full rounded-2xl border bg-secondary/50 dark:bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-primary/10 ${
+            error
+              ? "border-destructive/60 focus:border-destructive"
+              : "border-border dark:border-white/10 focus:border-primary/50 focus:bg-white/8"
+          }`}
+        />
+      </div>
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="flex items-center gap-1.5 pl-2 text-xs font-medium text-destructive"
+          >
+            <AlertCircle size={11} /> {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
