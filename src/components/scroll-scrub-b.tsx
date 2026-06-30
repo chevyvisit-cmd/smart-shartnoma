@@ -53,6 +53,15 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
     <div ref={sectionRef} className="relative" style={{ minHeight: "360vh" }} data-scroll-cursor>
       <div className="sticky top-0 h-screen overflow-hidden bg-[#0a1410]">
 
+        {/* Ambient background video — always playing, not scroll-linked */}
+        <video
+          autoPlay muted loop playsInline preload="none"
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.16] pointer-events-none select-none"
+          aria-hidden
+        >
+          <source src="/videos/ambient-rain-bg.mp4" type="video/mp4" />
+        </video>
+
         {/* Top fade — blends with ScrollScrubA above */}
         <div
           className="absolute top-0 left-0 right-0 h-40 z-20 pointer-events-none"
