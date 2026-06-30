@@ -117,10 +117,9 @@ export async function sendSmsCode(
 
   // Also send via Telegram if user has chatId saved
   const existingUser = await findUserByPhone(normalized);
-  // @ts-expect-error — telegramChatId exists after prisma generate (IDE cache stale)
-  if (existingUser?.telegramChatId) {
-    // @ts-expect-error -- telegramChatId added via prisma generate
-    await sendTelegramOtp(existingUser.telegramChatId, code);
+  const chatId = (existingUser as Record<string, unknown>)?.telegramChatId as string | null;
+  if (chatId) {
+    await sendTelegramOtp(chatId, code);
   }
 
   return { success: true, isExistingUser };
@@ -157,12 +156,11 @@ export async function sendLoginCode(
       console.log(`Email unavailable. Phone: ${normalized}, Code: ${code}`);
     }
   } else {
-    // @ts-expect-error — telegramChatId exists after prisma generate (IDE cache stale)
-    if (!user.telegramChatId) {
+    const tgChatId = (user as Record<string, unknown>).telegramChatId as string | null;
+    if (!tgChatId) {
       return { error: "Telegram bot bilan bog'lanmagan. Avval @SmartShartnoma_bot ni ishga tushiring." };
     }
-    // @ts-expect-error
-    await sendTelegramOtp(user.telegramChatId, code);
+    await sendTelegramOtp(tgChatId, code);
   }
 
   return { success: true };
