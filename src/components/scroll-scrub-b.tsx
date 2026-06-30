@@ -55,8 +55,8 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
 
         {/* Ambient background video — always playing, not scroll-linked */}
         <video
-          autoPlay muted loop playsInline preload="none"
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.16] pointer-events-none select-none"
+          autoPlay muted loop playsInline preload="auto"
+          className="absolute inset-0 h-full w-full object-cover opacity-40 pointer-events-none select-none"
           aria-hidden
         >
           <source src="/videos/ambient-rain-bg.mp4" type="video/mp4" />
@@ -73,73 +73,78 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
 
           {/* ── LEFT: Text block ── */}
           <div className="flex w-full flex-col justify-center px-8 pb-4 pt-24 sm:px-12 md:w-1/2 md:py-0 lg:px-16 xl:px-24">
+            <div className="relative max-w-lg rounded-[28px] border border-white/6 bg-[#0a1410]/55 p-8 backdrop-blur-xl sm:p-10">
 
-            {/* Eyebrow */}
-            <div className="mb-8 flex items-center gap-3">
-              <span className="text-[10px] font-black tracking-[0.32em] text-primary uppercase">
-                {uz ? "Jarayon" : "Процесс"}
-              </span>
-              <div className="h-px w-12 bg-primary/40" />
-            </div>
+              {/* Left accent bar */}
+              <div className="absolute left-0 top-8 bottom-8 w-px bg-linear-to-b from-transparent via-primary/50 to-transparent" />
 
-            {/* Animated step content */}
-            <div className="relative" style={{ minHeight: "clamp(160px, 28vh, 340px)" }}>
-              <AnimatePresence mode="sync">
-                <motion.div
-                  key={activeStep}
-                  initial={{ opacity: 0, y: scrollingUp ? -56 : 56, filter: "blur(8px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.38, ease: EASE } }}
-                  exit={{ opacity: 0, y: scrollingUp ? 56 : -56, filter: "blur(8px)", transition: { duration: 0.26, ease: EASE } }}
-                  className="absolute inset-0 flex flex-col justify-center"
-                >
-                  {/* Step counter */}
-                  <div className="mb-5 flex items-baseline gap-2.5">
-                    <span className="font-mono text-sm font-black tracking-[0.22em] text-primary">{numStr}</span>
-                    <span className="font-mono text-sm tracking-[0.22em] text-white/25">
-                      / {String(STEP_COUNT).padStart(2, "0")}
-                    </span>
-                  </div>
+              {/* Eyebrow */}
+              <div className="mb-9 flex items-center gap-3">
+                <span className="text-[10px] font-black tracking-[0.32em] text-primary uppercase">
+                  {uz ? "Jarayon" : "Процесс"}
+                </span>
+                <div className="h-px w-12 bg-primary/40" />
+              </div>
 
-                  {/* Big title */}
-                  <h2
-                    className="font-black tracking-tighter text-white"
-                    style={{
-                      fontSize: "clamp(2.2rem, 5vw, 5rem)",
-                      lineHeight: 0.94,
-                      whiteSpace: "pre-line",
+              {/* Animated step content */}
+              <div className="relative" style={{ minHeight: "clamp(160px, 28vh, 320px)" }}>
+                <AnimatePresence mode="sync">
+                  <motion.div
+                    key={activeStep}
+                    initial={{ opacity: 0, y: scrollingUp ? -56 : 56, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.38, ease: EASE } }}
+                    exit={{ opacity: 0, y: scrollingUp ? 56 : -56, filter: "blur(8px)", transition: { duration: 0.26, ease: EASE } }}
+                    className="absolute inset-0 flex flex-col justify-center"
+                  >
+                    {/* Step counter */}
+                    <div className="mb-5 flex items-baseline gap-2.5">
+                      <span className="font-mono text-sm font-black tracking-[0.22em] text-primary">{numStr}</span>
+                      <span className="font-mono text-sm tracking-[0.22em] text-white/25">
+                        / {String(STEP_COUNT).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    {/* Big title */}
+                    <h2
+                      className="font-black tracking-tighter text-white"
+                      style={{
+                        fontSize: "clamp(2rem, 4.4vw, 4.4rem)",
+                        lineHeight: 0.96,
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {steps[activeStep].title}
+                    </h2>
+
+                    {/* Description */}
+                    <motion.p
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.22, duration: 0.42, ease: "easeOut" }}
+                      className="mt-6 max-w-xs leading-relaxed text-white/50"
+                      style={{ fontSize: "clamp(0.9rem, 1.6vw, 1.1rem)" }}
+                    >
+                      {steps[activeStep].desc}
+                    </motion.p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Progress dots */}
+              <div className="mt-10 flex items-center gap-2.5">
+                {steps.map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      width:           i === activeStep ? 32 : 7,
+                      opacity:         i < activeStep ? 0.40 : i === activeStep ? 1 : 0.16,
+                      backgroundColor: i <= activeStep ? "#2D6A4F" : "rgba(255,255,255,0.18)",
                     }}
-                  >
-                    {steps[activeStep].title}
-                  </h2>
-
-                  {/* Description */}
-                  <motion.p
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.22, duration: 0.42, ease: "easeOut" }}
-                    className="mt-6 max-w-xs leading-relaxed text-white/45"
-                    style={{ fontSize: "clamp(0.9rem, 1.6vw, 1.15rem)" }}
-                  >
-                    {steps[activeStep].desc}
-                  </motion.p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* Progress dots */}
-            <div className="mt-10 flex items-center gap-2.5">
-              {steps.map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{
-                    width:           i === activeStep ? 32 : 7,
-                    opacity:         i < activeStep ? 0.40 : i === activeStep ? 1 : 0.16,
-                    backgroundColor: i <= activeStep ? "#2D6A4F" : "rgba(255,255,255,0.18)",
-                  }}
-                  transition={{ duration: 0.38, ease: "easeInOut" }}
-                  className="h-1.5 rounded-full"
-                />
-              ))}
+                    transition={{ duration: 0.38, ease: "easeInOut" }}
+                    className="h-1.5 rounded-full"
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
