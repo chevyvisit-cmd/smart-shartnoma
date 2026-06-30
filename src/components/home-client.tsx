@@ -365,7 +365,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
   const videoProg = useSpring(scrollYProgress, { stiffness: 28, damping: 22, mass: 1.4 });
 
   useMotionValueEvent(videoProg, "change", (latest) => {
-    if (!isDesktop) return;
+    if (!isDesktop || latest > 0.92) return; // stop seeks when hero is almost gone
     const v = scrubVideoRef.current;
     if (v?.duration) v.currentTime = latest * v.duration;
   });
@@ -388,7 +388,7 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
 
       {/* ── HERO wrapper — extra scroll space for scrub on desktop ── */}
       <div ref={heroRef} style={{ minHeight: isDesktop ? "170vh" : "100vh" }}>
-      <section className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
+      <section className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center" style={{ willChange: "transform" }}>
 
         {/* z-0 → z-2: video, overlay, grid, sweep, top line */}
         <HeroBackground
