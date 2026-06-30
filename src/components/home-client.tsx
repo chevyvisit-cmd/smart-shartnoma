@@ -358,15 +358,17 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
     offset: ["start start", "end start"],
   });
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+  /* Smooth spring for text transforms */
+  const smoothProg = useSpring(scrollYProgress, { stiffness: 50, damping: 18, mass: 0.6 });
+
+  /* Slower spring for video — reduces seek frequency → eliminates stutter */
+  const videoProg = useSpring(scrollYProgress, { stiffness: 28, damping: 22, mass: 1.4 });
+
+  useMotionValueEvent(videoProg, "change", (latest) => {
     if (!isDesktop) return;
     const v = scrubVideoRef.current;
     if (v?.duration) v.currentTime = latest * v.duration;
   });
-
-  /* Smooth spring version of scrollYProgress — used only for text transforms.
-     Video scrub keeps the raw value for frame-accurate response.           */
-  const smoothProg = useSpring(scrollYProgress, { stiffness: 50, damping: 18, mass: 0.6 });
 
   /* Scroll-linked text transforms — desktop only (mobile uses initial/animate)
      Phase 1 (0 → ~0.18): text slides IN as video begins playing
