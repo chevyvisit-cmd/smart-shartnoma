@@ -178,10 +178,19 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
                   className="flex items-center justify-between px-4 py-4 hover:bg-white/5 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                      contract.type === "DOGOVOR" ? "bg-blue-500/10 text-blue-400" : "bg-primary/10 text-primary"
+                    }`}>
                       <FileText size={16} />
                     </div>
                     <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md ${
+                          contract.type === "DOGOVOR"
+                            ? "bg-blue-500/15 text-blue-400"
+                            : "bg-primary/15 text-primary"
+                        }`}>{contract.type || "KONTRAKT"}</span>
+                      </div>
                       <p className="font-black text-sm truncate">{contract.title}</p>
                       <p className="text-xs text-primary font-bold">{(contract.amount || 0).toLocaleString()} UZS</p>
                     </div>
@@ -227,10 +236,19 @@ export function DashboardClient({ contracts, stats, quota, lang }: {
                   >
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110 ${
+                          contract.type === "DOGOVOR" ? "bg-blue-500/10 text-blue-400" : "bg-primary/10 text-primary"
+                        }`}>
                           <FileText size={18} />
                         </div>
-                        <span className="font-bold group-hover:text-primary transition-colors">{contract.title}</span>
+                        <div>
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md ${
+                            contract.type === "DOGOVOR"
+                              ? "bg-blue-500/15 text-blue-400"
+                              : "bg-primary/15 text-primary"
+                          }`}>{contract.type || "KONTRAKT"}</span>
+                          <p className="mt-0.5 font-bold group-hover:text-primary transition-colors">{contract.title}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-5 font-black text-primary">{(contract.amount || 0).toLocaleString()} UZS</td>

@@ -207,15 +207,24 @@ export function RegisterClient({ lang }: { lang: Language }) {
                   }}
                 />
 
-                <FieldWithError
-                  icon={<Mail size={18} />}
-                  name="email"
-                  type="email"
-                  placeholder="email@example.com"
-                  required
-                  inputMode="email"
-                  error={fieldErrors.email}
-                />
+                {/* Gmail label */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 px-1">
+                    <Mail size={13} className="text-primary" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">
+                      Gmail — {uz ? "kod shu manzilga yuboriladi" : "код придёт на этот адрес"}
+                    </span>
+                  </div>
+                  <FieldWithError
+                    icon={<Mail size={18} />}
+                    name="email"
+                    type="email"
+                    placeholder="yourname@gmail.com"
+                    required
+                    inputMode="email"
+                    error={fieldErrors.email}
+                  />
+                </div>
 
                 <FieldWithError
                   icon={<Hash size={18} />}
@@ -239,7 +248,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
                   <span className="relative z-10 flex items-center gap-2">
                     {isLoading
                       ? (uz ? "Yuklanmoqda..." : "Загрузка...")
-                      : (uz ? "Kodni emailga yuborish" : "Отправить код на email")}
+                      : (uz ? "Kodni Gmailga yuborish" : "Отправить код на Gmail")}
                     {!isLoading && <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />}
                   </span>
                   <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500 group-hover:translate-x-full" />

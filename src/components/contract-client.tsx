@@ -89,26 +89,26 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
   <title>${contract.title}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Times New Roman',serif;font-size:13pt;color:#111;background:#fff;padding:40px 60px;max-width:800px;margin:auto}
+    body{font-family:'Times New Roman',serif;font-size:13pt;color:#111;background:#fff;padding:40px 60px;max-width:800px;margin:auto;word-break:break-word;overflow-wrap:break-word}
     .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a3d2d;padding-bottom:16px;margin-bottom:24px}
     .logo{font-family:Arial,sans-serif;font-size:18pt;font-weight:900;letter-spacing:-1px;color:#1a3d2d}
     .logo span{color:#D4A537}
     .meta{text-align:right;font-size:9pt;color:#555;font-family:Arial,sans-serif}
     .status-badge{display:inline-block;background:${contract.status==="SIGNED"?"#d1fae5":"#fef3c7"};color:${contract.status==="SIGNED"?"#065f46":"#92400e"};font-family:Arial,sans-serif;font-size:8pt;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-top:4px}
-    h1{font-size:22pt;font-weight:900;margin:20px 0 8px;line-height:1.2}
+    h1{font-size:22pt;font-weight:900;margin:20px 0 8px;line-height:1.2;word-break:break-word}
     .amount{font-size:16pt;font-weight:900;color:#1a3d2d;margin-bottom:28px}
     .parties{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}
-    .party{border:1px solid #ccc;border-radius:8px;padding:16px}
+    .party{border:1px solid #ccc;border-radius:8px;padding:16px;min-width:0;overflow:hidden}
     .party-label{font-family:Arial,sans-serif;font-size:8pt;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:8px}
-    section{margin:24px 0}
+    section{margin:24px 0;page-break-inside:avoid}
     h3{font-family:Arial,sans-serif;font-size:9pt;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:6px}
-    .content-box{background:#f9f9f9;border-radius:8px;padding:16px;font-size:12pt;line-height:1.7;white-space:pre-wrap}
+    .content-box{background:#f9f9f9;border-radius:8px;padding:16px;font-size:12pt;line-height:1.7;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;max-width:100%;overflow:hidden}
     ol{padding-left:20px;line-height:2}
-    li{margin-bottom:4px}
-    .signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px}
+    li{margin-bottom:4px;word-break:break-word}
+    .signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;page-break-inside:avoid}
     .sig-block{border-top:1px solid #111;padding-top:8px;font-size:9pt;color:#555}
     .footer{margin-top:40px;padding-top:16px;border-top:1px solid #eee;font-family:Arial,sans-serif;font-size:8pt;color:#aaa;text-align:center}
-    @media print{body{padding:20px 40px}@page{margin:20mm}}
+    @media print{body{padding:20px 30px}@page{margin:15mm;size:A4}}
   </style>
 </head>
 <body>
@@ -307,9 +307,18 @@ export function ContractClient({ contract, currentUserId, lang }: { contract: an
 
           <div className="p-4 sm:p-8 md:p-12">
             <div className="mb-8 sm:mb-12">
-              {contract.cid && (
-                <p className="mb-3 text-xs font-black tracking-widest text-primary/50 uppercase">{contract.cid}</p>
-              )}
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                {contract.cid && (
+                  <span className="text-xs font-black tracking-widest text-primary/50 uppercase">{contract.cid}</span>
+                )}
+                <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-black uppercase tracking-wider ${
+                  contract.type === "DOGOVOR"
+                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                    : "bg-primary/10 text-primary border border-primary/20"
+                }`}>
+                  {contract.type === "DOGOVOR" ? "📋 Dogovor" : "📄 Kontrakt"}
+                </span>
+              </div>
               <h1 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-foreground">{contract.title}</h1>
               <div className="mt-4 sm:mt-6 flex items-center gap-3 text-xl sm:text-3xl font-black text-primary">
                 <DollarSign size={24} className="sm:hidden" /><DollarSign size={32} className="hidden sm:block" />
