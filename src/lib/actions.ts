@@ -128,6 +128,7 @@ export async function sendSmsCode(
 
 export async function sendLoginCode(
   phone: string,
+  email?: string,
 ): Promise<{ success: true } | { error: string }> {
   const normalized = normalizePhone(phone);
   const user = await findUserByPhone(normalized);
@@ -143,11 +144,12 @@ export async function sendLoginCode(
     create: { phone: normalized, code, expiresAt: new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000) },
   });
 
-  // Send via email
-  if (user.email) {
+  // Send via email — prefer the one the user typed, fallback to saved
+  const targetEmail = email || user.email;
+  if (targetEmail) {
     try {
       const { sendEmail } = await import("./email");
-      await sendEmail(user.email, code);
+      await sendEmail(targetEmail, code);
     } catch {
       console.log(`Email unavailable. Phone: ${normalized}, Code: ${code}`);
     }

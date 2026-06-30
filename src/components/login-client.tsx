@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendLoginCode, verifyLoginCode } from "@/lib/actions";
 import {
-  Phone, ChevronRight, ArrowLeft, ShieldCheck,
+  Phone, Mail, ChevronRight, ArrowLeft, ShieldCheck,
   CheckCircle2, RefreshCw, AlertCircle, LogIn,
 } from "lucide-react";
 import { Language } from "@/lib/translations";
@@ -15,6 +15,7 @@ export function LoginClient({ lang }: { lang: Language }) {
 
   const [step, setStep]     = useState<1 | 2>(1);
   const [phone, setPhone]   = useState("");
+  const [email, setEmail]   = useState("");
   const [code, setCode]     = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError]   = useState("");
@@ -26,7 +27,7 @@ export function LoginClient({ lang }: { lang: Language }) {
     setError("");
     setIsLoading(true);
 
-    const res = await sendLoginCode(phone.trim());
+    const res = await sendLoginCode(phone.trim(), email.trim() || undefined);
     setIsLoading(false);
 
     if ("error" in res) {
@@ -56,7 +57,7 @@ export function LoginClient({ lang }: { lang: Language }) {
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setError("");
-    await sendLoginCode(phone.trim());
+    await sendLoginCode(phone.trim(), email.trim() || undefined);
     startResendCooldown();
   };
 
@@ -100,7 +101,9 @@ export function LoginClient({ lang }: { lang: Language }) {
             <p className="mt-2 text-sm text-muted-foreground">
               {step === 1
                 ? (uz ? "Ro'yxatdan o'tgan telefon raqamingizni kiriting" : "Введите зарегистрированный номер телефона")
-                : (uz ? `Kod ${phone} raqamiga bog'liq emailga yuborildi` : `Код отправлен на email, привязанный к ${phone}`)}
+                : email
+                  ? (uz ? `Kod ${email} manziliga yuborildi` : `Код отправлен на ${email}`)
+                  : (uz ? `Kod ${phone} ga bog'liq emailga yuborildi` : `Код отправлен на email, привязанный к ${phone}`)}
             </p>
           </div>
 
@@ -150,6 +153,18 @@ export function LoginClient({ lang }: { lang: Language }) {
                     }}
                     placeholder="+998 XX XXX XX XX"
                     inputMode="tel"
+                    className="w-full rounded-2xl border border-border dark:border-white/10 bg-secondary/50 dark:bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/8 focus:ring-4 focus:ring-primary/10"
+                  />
+                </div>
+
+                <div className="group relative">
+                  <Mail className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" size={18} />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={uz ? "Email (ixtiyoriy)" : "Email (необязательно)"}
+                    inputMode="email"
                     className="w-full rounded-2xl border border-border dark:border-white/10 bg-secondary/50 dark:bg-white/5 py-4 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:border-primary/50 focus:bg-white/8 focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
