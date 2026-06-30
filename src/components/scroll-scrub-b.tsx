@@ -1,54 +1,19 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Language } from "@/lib/translations";
 
 const VIDEO_SRC  = "/videos/jarayon-3d.mp4";
 const STEP_COUNT = 6;
-const TWEEN_MS   = 550;
 const EASE = [0.21, 0.45, 0.15, 1.0] as const;
-
-/* RAF-based smooth tween of video.currentTime */
-function tweenVideoTo(
-  v: HTMLVideoElement,
-  targetTime: number,
-  rafHandle: { current: number | null },
-) {
-  if (rafHandle.current !== null) {
-    cancelAnimationFrame(rafHandle.current);
-    rafHandle.current = null;
-  }
-  const startTime = v.currentTime;
-  const diff      = targetTime - startTime;
-  const startTS   = performance.now();
-
-  const tick = (now: number) => {
-    const t      = Math.min((now - startTS) / TWEEN_MS, 1);
-    const eased  = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    v.currentTime = startTime + diff * eased;
-    if (t < 1) {
-      rafHandle.current = requestAnimationFrame(tick);
-    } else {
-      rafHandle.current = null;
-    }
-  };
-  rafHandle.current = requestAnimationFrame(tick);
-}
 
 export function ScrollScrubB({ lang }: { lang: Language }) {
   const sectionRef  = useRef<HTMLDivElement>(null);
-  const videoRef    = useRef<HTMLVideoElement>(null);
-  const readyRef    = useRef(false);
   const prevStepRef = useRef(0);
-  const rafHandle   = useRef<number | null>(null);
 
   const [activeStep,  setActiveStep]  = useState(0);
   const [scrollingUp, setScrollingUp] = useState(false);
-
-  useEffect(() => () => {
-    if (rafHandle.current !== null) cancelAnimationFrame(rafHandle.current);
-  }, []);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -61,11 +26,6 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
       setScrollingUp(next < prevStepRef.current);
       setActiveStep(next);
       prevStepRef.current = next;
-
-      const v = videoRef.current;
-      if (readyRef.current && v?.duration) {
-        tweenVideoTo(v, (next / STEP_COUNT) * v.duration, rafHandle);
-      }
     }
   });
 
@@ -174,7 +134,7 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
             </div>
           </div>
 
-          {/* ── RIGHT: Video panel ── */}
+          {/* ── RIGHT: Video panel — always autoplay/loop, no scroll control ── */}
           <div className="flex w-full shrink-0 items-center justify-center p-5 md:w-1/2 md:p-10 lg:p-14">
             <div
               className="relative w-[90%] overflow-hidden shadow-2xl"
@@ -185,27 +145,9 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
                 boxShadow: "0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(45,106,79,0.07)",
               }}
             >
-              {/* Desktop: scrub-controlled */}
               <video
-                ref={videoRef}
-                muted
-                playsInline
-                preload="auto"
-                onLoadedMetadata={() => {
-                  readyRef.current = true;
-                  const v = videoRef.current;
-                  if (v) v.currentTime = 0;
-                  v?.pause();
-                }}
-                className="absolute inset-0 hidden h-full w-full object-cover md:block"
-              >
-                <source src={VIDEO_SRC} type="video/mp4" />
-              </video>
-
-              {/* Mobile: autoplay loop */}
-              <video
-                autoPlay muted loop playsInline preload="none"
-                className="absolute inset-0 h-full w-full object-cover md:hidden"
+                autoPlay muted loop playsInline preload="auto"
+                className="absolute inset-0 h-full w-full object-cover"
               >
                 <source src={VIDEO_SRC} type="video/mp4" />
               </video>
