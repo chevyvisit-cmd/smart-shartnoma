@@ -11,7 +11,6 @@ const EASE = [0.21, 0.45, 0.15, 1.0] as const;
 export function ScrollScrubB({ lang }: { lang: Language }) {
   const sectionRef  = useRef<HTMLDivElement>(null);
   const prevStepRef = useRef(0);
-
   const [activeStep,  setActiveStep]  = useState(0);
   const [scrollingUp, setScrollingUp] = useState(false);
 
@@ -33,161 +32,220 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
 
   const steps = uz ? [
     { title: "Ro'yxatdan\no'tish",          desc: "Faqat JShShIR va telefon raqami kifoya" },
-    { title: "Shartnoma\nmatnini tanlash",   desc: "Tayyor shablon yoki o'zingiznikini yozish" },
+    { title: "Shablon\ntanlash",             desc: "Tayyor shablon yoki o'zingiznikini yozish" },
     { title: "Ikkinchi tomonga\nyuborish",   desc: "Telefon raqami yoki ID orqali" },
-    { title: "SMS-OTP\ntasdiqlash",          desc: "Ikki tomon ham tasdiqlaydi" },
+    { title: "SMS-OTP\ntasdiqlash",          desc: "Ikki tomon ham bir vaqtda tasdiqlaydi" },
     { title: "Elektron\nimzo",               desc: "Qonuniy kuchga ega bo'ladi" },
     { title: "Tarix va\nnazorat",            desc: "Istalgan vaqt ko'rish, yuklab olish" },
   ] : [
-    { title: "Регистрация",                  desc: "Только ИНН и номер телефона" },
-    { title: "Выбор текста\nдоговора",       desc: "Готовый шаблон или свой вариант" },
-    { title: "Отправка\nвторой стороне",     desc: "По номеру телефона или ID" },
-    { title: "Подтверждение\nSMS-OTP",       desc: "Обе стороны подтверждают" },
+    { title: "Регистра-\nция",               desc: "Только ИНН и номер телефона" },
+    { title: "Выбор\nшаблона",               desc: "Готовый шаблон или свой вариант" },
+    { title: "Отправка\nстороне",            desc: "По номеру телефона или ID" },
+    { title: "Подтверж-\nдение OTP",         desc: "Обе стороны подтверждают" },
     { title: "Электронная\nподпись",         desc: "Получает юридическую силу" },
     { title: "История и\nконтроль",          desc: "Просмотр и загрузка в любое время" },
   ];
 
-  const numStr = String(activeStep + 1).padStart(2, "0");
+  const numStr   = String(activeStep + 1).padStart(2, "0");
+  const totalStr = String(STEP_COUNT).padStart(2, "0");
 
   return (
     <div ref={sectionRef} className="relative" style={{ minHeight: "360vh" }} data-scroll-cursor>
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#0a1410]">
+      <div className="sticky top-0 h-screen overflow-hidden bg-[#080f0c]">
 
-        {/* Ambient background video — always playing, not scroll-linked */}
+        {/* Ambient video */}
         <video
           autoPlay muted loop playsInline preload="none"
-          className="absolute inset-0 h-full w-full object-cover opacity-40 pointer-events-none select-none"
+          className="absolute inset-0 h-full w-full object-cover opacity-20 pointer-events-none select-none"
           aria-hidden
         >
           <source src="/videos/ambient-rain-bg.mp4" type="video/mp4" />
         </video>
 
-        {/* Top fade — blends with ScrollScrubA above */}
+        {/* Subtle grid */}
         <div
-          className="absolute top-0 left-0 right-0 h-40 z-20 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, #0a1410 0%, transparent 100%)" }}
+          className="absolute inset-0 pointer-events-none opacity-[0.025]"
+          style={{
+            backgroundImage: "linear-gradient(#2d6a4f 1px, transparent 1px), linear-gradient(90deg, #2d6a4f 1px, transparent 1px)",
+            backgroundSize: "80px 80px",
+          }}
         />
 
-        {/* ── SPLIT PANEL ── */}
-        <div className="relative z-10 flex h-full flex-col md:flex-row">
+        {/* Top fade */}
+        <div
+          className="absolute top-0 left-0 right-0 h-36 z-20 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, #080f0c 0%, transparent 100%)" }}
+        />
 
-          {/* ── LEFT: Text block ── */}
-          <div className="flex w-full flex-col justify-center px-8 pb-4 pt-24 sm:px-12 md:w-1/2 md:py-0 lg:px-16 xl:px-24">
-            <div className="relative max-w-lg rounded-[28px] border border-white/6 bg-[#0a1410]/55 p-8 backdrop-blur-xl sm:p-10">
+        {/* ── MAIN LAYOUT ── */}
+        <div className="relative z-10 flex h-full flex-col md:flex-row items-stretch">
 
-              {/* Left accent bar */}
-              <div className="absolute left-0 top-8 bottom-8 w-px bg-linear-to-b from-transparent via-primary/50 to-transparent" />
+          {/* ── LEFT ── */}
+          <div className="relative flex w-full flex-col justify-center overflow-hidden px-8 pb-8 pt-28 sm:px-12 md:w-[52%] md:py-0 lg:px-16 xl:px-20">
 
-              {/* Eyebrow */}
-              <div className="mb-9 flex items-center gap-3">
-                <span className="text-[10px] font-black tracking-[0.32em] text-primary uppercase">
+            {/* Huge ghost number */}
+            <AnimatePresence mode="sync">
+              <motion.div
+                key={`ghost-${activeStep}`}
+                initial={{ opacity: 0, scale: 0.88 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.55, ease: EASE } }}
+                exit={{ opacity: 0, scale: 1.08, transition: { duration: 0.3, ease: EASE } }}
+                className="pointer-events-none absolute select-none font-black text-white/3"
+                style={{
+                  fontSize: "clamp(18rem, 38vw, 38rem)",
+                  lineHeight: 1,
+                  right: "-0.12em",
+                  bottom: "-0.18em",
+                  letterSpacing: "-0.06em",
+                }}
+              >
+                {numStr}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Eyebrow row */}
+            <div className="mb-10 flex items-center gap-4">
+              <div className="flex items-center gap-2.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-black tracking-[0.36em] text-primary uppercase">
                   {uz ? "Jarayon" : "Процесс"}
                 </span>
-                <div className="h-px w-12 bg-primary/40" />
               </div>
+              <div className="h-px flex-1 bg-linear-to-r from-primary/30 to-transparent max-w-20" />
+              <span className="font-mono text-[11px] font-black tracking-[0.2em] text-white/20">
+                {numStr} <span className="text-white/10">/ {totalStr}</span>
+              </span>
+            </div>
 
-              {/* Animated step content */}
-              <div className="relative" style={{ minHeight: "clamp(160px, 28vh, 320px)" }}>
-                <AnimatePresence mode="sync">
-                  <motion.div
-                    key={activeStep}
-                    initial={{ opacity: 0, y: scrollingUp ? -56 : 56, filter: "blur(8px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.38, ease: EASE } }}
-                    exit={{ opacity: 0, y: scrollingUp ? 56 : -56, filter: "blur(8px)", transition: { duration: 0.26, ease: EASE } }}
-                    className="absolute inset-0 flex flex-col justify-center"
+            {/* Animated step */}
+            <div className="relative" style={{ minHeight: "clamp(180px, 32vh, 340px)" }}>
+              <AnimatePresence mode="sync">
+                <motion.div
+                  key={activeStep}
+                  initial={{ opacity: 0, y: scrollingUp ? -48 : 48, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.42, ease: EASE } }}
+                  exit={{ opacity: 0, y: scrollingUp ? 48 : -48, filter: "blur(10px)", transition: { duration: 0.28, ease: EASE } }}
+                  className="absolute inset-0 flex flex-col justify-center"
+                >
+                  {/* Title */}
+                  <h2
+                    className="font-black tracking-tighter text-white"
+                    style={{
+                      fontSize: "clamp(2.8rem, 5.5vw, 6rem)",
+                      lineHeight: 0.92,
+                      whiteSpace: "pre-line",
+                    }}
                   >
-                    {/* Step counter */}
-                    <div className="mb-5 flex items-baseline gap-2.5">
-                      <span className="font-mono text-sm font-black tracking-[0.22em] text-primary">{numStr}</span>
-                      <span className="font-mono text-sm tracking-[0.22em] text-white/25">
-                        / {String(STEP_COUNT).padStart(2, "0")}
-                      </span>
-                    </div>
+                    {steps[activeStep].title}
+                  </h2>
 
-                    {/* Big title */}
-                    <h2
-                      className="font-black tracking-tighter text-white"
-                      style={{
-                        fontSize: "clamp(2rem, 4.4vw, 4.4rem)",
-                        lineHeight: 0.96,
-                        whiteSpace: "pre-line",
-                      }}
-                    >
-                      {steps[activeStep].title}
-                    </h2>
-
-                    {/* Description */}
+                  {/* Accent line + description */}
+                  <div className="mt-7 flex items-start gap-4">
+                    <div className="mt-1.5 h-8 w-px shrink-0 bg-primary/50" />
                     <motion.p
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.22, duration: 0.42, ease: "easeOut" }}
-                      className="mt-6 max-w-xs leading-relaxed text-white/50"
-                      style={{ fontSize: "clamp(0.9rem, 1.6vw, 1.1rem)" }}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2, duration: 0.4, ease: "easeOut" }}
+                      className="leading-relaxed text-white/45"
+                      style={{ fontSize: "clamp(0.9rem, 1.5vw, 1.1rem)" }}
                     >
                       {steps[activeStep].desc}
                     </motion.p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-              {/* Progress dots */}
-              <div className="mt-10 flex items-center gap-2.5">
-                {steps.map((_, i) => (
+            {/* Progress — numbered steps */}
+            <div className="mt-10 flex items-center gap-3">
+              {steps.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Step ${i + 1}`}
+                  className="group relative flex items-center"
+                >
                   <motion.div
-                    key={i}
                     animate={{
-                      width:           i === activeStep ? 32 : 7,
-                      opacity:         i < activeStep ? 0.40 : i === activeStep ? 1 : 0.16,
-                      backgroundColor: i <= activeStep ? "#2D6A4F" : "rgba(255,255,255,0.18)",
+                      width:           i === activeStep ? 36 : 8,
+                      opacity:         i < activeStep ? 0.35 : i === activeStep ? 1 : 0.14,
+                      backgroundColor: i <= activeStep ? "#2D6A4F" : "rgba(255,255,255,0.15)",
                     }}
-                    transition={{ duration: 0.38, ease: "easeInOut" }}
-                    className="h-1.5 rounded-full"
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="h-0.75 rounded-full"
                   />
-                ))}
-              </div>
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* ── RIGHT: Video panel — always autoplay/loop, no scroll control ── */}
-          <div className="flex w-full shrink-0 items-center justify-center p-4 md:w-1/2 md:p-6 lg:p-8">
-            <div
-              className="relative w-full"
-              style={{
-                aspectRatio: "5 / 4",
-                clipPath: "polygon(48px 0, 100% 0, 100% calc(100% - 48px), calc(100% - 48px) 100%, 0 100%, 0 48px)",
-                boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(45,106,79,0.12)",
-              }}
-            >
-              <video
-                autoPlay muted loop playsInline preload="auto"
-                className="absolute inset-0 h-full w-full object-cover"
-              >
-                <source src={VIDEO_SRC} type="video/mp4" />
-              </video>
+          {/* ── RIGHT: Video ── */}
+          <div className="flex w-full shrink-0 items-center justify-center p-6 md:w-[48%] md:p-8 lg:p-10">
+            <div className="relative w-full max-w-130">
 
-              {/* Subtle inner vignette */}
+              {/* Glow behind video */}
               <div
-                className="absolute inset-0 pointer-events-none"
+                className="absolute -inset-8 pointer-events-none"
                 style={{
-                  background: "radial-gradient(ellipse 110% 110% at 50% 50%, transparent 55%, rgba(10,20,16,0.45) 100%)",
+                  background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(45,106,79,0.18) 0%, transparent 70%)",
+                  filter: "blur(24px)",
                 }}
               />
 
-              {/* Step badge overlay */}
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-                <span className="font-mono text-[11px] font-black tracking-widest text-white/70">
-                  {numStr} / 06
-                </span>
+              {/* Video container */}
+              <div
+                className="relative overflow-hidden"
+                style={{
+                  aspectRatio: "4 / 5",
+                  clipPath: "polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px)",
+                  boxShadow: "0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(45,106,79,0.15)",
+                }}
+              >
+                <video
+                  autoPlay muted loop playsInline preload="auto"
+                  className="absolute inset-0 h-full w-full object-cover"
+                >
+                  <source src={VIDEO_SRC} type="video/mp4" />
+                </video>
+
+                {/* Vignette */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "radial-gradient(ellipse 120% 120% at 50% 50%, transparent 45%, rgba(8,15,12,0.55) 100%)",
+                  }}
+                />
+
+                {/* Top-left cut accent line */}
+                <div
+                  className="absolute top-0 left-0 pointer-events-none"
+                  style={{
+                    width: 40, height: 40,
+                    background: "linear-gradient(135deg, rgba(45,106,79,0.6) 0%, transparent 55%)",
+                  }}
+                />
+
+                {/* Badge */}
+                <div className="absolute bottom-5 left-5 flex items-center gap-2 rounded-full border border-white/10 bg-black/50 px-3.5 py-1.5 backdrop-blur-md">
+                  <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                  <span className="font-mono text-[11px] font-black tracking-[0.18em] text-white/60">
+                    {numStr} / {totalStr}
+                  </span>
+                </div>
+              </div>
+
+              {/* Corner accent — bottom right */}
+              <div className="absolute bottom-0 right-0 pointer-events-none" style={{ zIndex: -1 }}>
+                <div className="h-12 w-px bg-linear-to-b from-primary/40 to-transparent" />
+                <div className="h-px w-12 bg-linear-to-r from-primary/40 to-transparent" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom fade → next section */}
+        {/* Bottom fade */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-10"
-          style={{ background: "linear-gradient(to bottom, transparent, #0a1410)" }}
+          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-20"
+          style={{ background: "linear-gradient(to bottom, transparent, #080f0c)" }}
         />
       </div>
     </div>
