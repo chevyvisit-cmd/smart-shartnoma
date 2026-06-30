@@ -19,7 +19,7 @@ export function ScrollScrubA({ lang }: { lang: Language }) {
   const uz = lang === "uz";
 
   return (
-    <section className="relative h-screen overflow-hidden bg-[#0a1410]" style={{ willChange: "transform" }}>
+    <section className="relative h-screen overflow-hidden bg-[#0a1410]">
 
       {/* Full-screen background video */}
       <video

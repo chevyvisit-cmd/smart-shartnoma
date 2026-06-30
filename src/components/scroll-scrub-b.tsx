@@ -51,7 +51,7 @@ export function ScrollScrubB({ lang }: { lang: Language }) {
 
   return (
     <div ref={sectionRef} className="relative" style={{ minHeight: "360vh" }} data-scroll-cursor>
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#0a1410]" style={{ willChange: "transform" }}>
+      <div className="sticky top-0 h-screen overflow-hidden bg-[#0a1410]">
 
         {/* Ambient background video — always playing, not scroll-linked */}
         <video
