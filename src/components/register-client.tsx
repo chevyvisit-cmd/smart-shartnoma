@@ -279,7 +279,7 @@ export function RegisterClient({ lang }: { lang: Language }) {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-black text-foreground">
-                      {uz ? "Email xatingizni oching" : "Откройте вашу почту"}
+                      {uz ? "Gmail xatingizni oching" : "Откройте Gmail"}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">{userData.email}</p>
                   </div>
@@ -287,8 +287,8 @@ export function RegisterClient({ lang }: { lang: Language }) {
 
                 <p className="text-center text-xs text-muted-foreground">
                   {uz
-                    ? "Smart-Shartnoma dan kelgan 4 xonali kodni kiriting"
-                    : "Введите 4-значный код из письма Smart-Shartnoma"}
+                    ? "Gmailga kelgan 4 xonali kodni kiriting"
+                    : "Введите 4-значный код из Gmail"}
                 </p>
 
                 {/* Code input */}
