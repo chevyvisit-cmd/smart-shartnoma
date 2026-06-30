@@ -1,16 +1,16 @@
 "use client";
 
-import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useRef, useEffect, RefObject } from "react";
-import { ArrowRight, Play, Scale, Banknote, ClipboardList, Handshake, ChevronDown } from "lucide-react";
+import { ArrowRight, Play, Scale, Banknote, ClipboardList, Handshake } from "lucide-react";
 import Link from "next/link";
 import { Language, translations } from "@/lib/translations";
-import { HeroBackground } from "@/components/motion/hero-background";
 import { ScrollScrubA } from "@/components/scroll-scrub-a";
 import { ScrollScrubB } from "@/components/scroll-scrub-b";
 import { ScrollCursor } from "@/components/motion/scroll-cursor";
 import { useAnimatedStrong, useRevealElements } from "@/hooks/use-scroll-animations";
 import { useStaggerReveal } from "@/hooks/use-stagger-reveal";
+import HeroSection from "@/components/HeroSection";
 
 const VIDEO_IDS = {
   uz: "xXcMtqop4xQ",
@@ -337,180 +337,17 @@ export function HomeClient({ isAuthenticated, lang }: { isAuthenticated: boolean
   const t = translations[lang].home;
   const [videoLang, setVideoLang] = useState<"uz" | "ru">(lang === "ru" ? "ru" : "uz");
   const [playing, setPlaying] = useState(false);
-  const iframeRef    = useRef<HTMLIFrameElement>(null);
-  const heroRef      = useRef<HTMLDivElement>(null);
-  const scrubVideoRef = useRef<HTMLVideoElement>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useAnimatedStrong();
   useRevealElements();
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mq.matches);
-    const h = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", h);
-    return () => mq.removeEventListener("change", h);
-  }, []);
-
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  /* Smooth spring for text transforms */
-  const smoothProg = useSpring(scrollYProgress, { stiffness: 50, damping: 18, mass: 0.6 });
-
-  /* Slower spring for video — reduces seek frequency → eliminates stutter */
-  const videoProg = useSpring(scrollYProgress, { stiffness: 28, damping: 22, mass: 1.4 });
-
-  useMotionValueEvent(videoProg, "change", (latest) => {
-    if (!isDesktop || latest > 0.92) return; // stop seeks when hero is almost gone
-    const v = scrubVideoRef.current;
-    if (v?.duration) v.currentTime = latest * v.duration;
-  });
-
-  /* Scroll-linked text transforms — desktop only (mobile uses initial/animate)
-     Phase 1 (0 → ~0.18): text slides IN as video begins playing
-     Phase 2 (0.18 → 0.45): text fully visible, video continues
-     Phase 3 (0.45 → 0.65): text slides OUT, video nears end               */
-  const badgeOp  = useTransform(smoothProg, [0, 0.11, 0.38, 0.56], [0, 1, 1, 0]);
-  const headOp   = useTransform(smoothProg, [0, 0.16, 0.42, 0.62], [0, 1, 1, 0]);
-  const headY    = useTransform(smoothProg, [0, 0.16, 0.42, 0.62], [55, 0, 0, -55]);
-  const subOp    = useTransform(smoothProg, [0.06, 0.22, 0.40, 0.60], [0, 1, 1, 0]);
-  const ctaOp    = useTransform(smoothProg, [0.10, 0.26, 0.40, 0.59], [0, 1, 1, 0]);
-  /* Scroll hint: visible at start, disappears as user begins scrolling */
-  const scrollOp = useTransform(smoothProg, [0, 0.09], [1, 0]);
 
   return (
     <div className="relative min-h-screen">
       <ScrollCursor />
 
-      {/* ── HERO wrapper — extra scroll space for scrub on desktop ── */}
-      <div ref={heroRef} style={{ minHeight: isDesktop ? "170vh" : "100vh" }}>
-      <section className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
-
-        {/* z-0 → z-2: video, overlay, grid, sweep, top line */}
-        <HeroBackground
-          scrubVideoRef={scrubVideoRef}
-          onVideoReady={() => {}}
-          isDesktop={isDesktop}
-        />
-
-        {/* z-2: Corner brackets */}
-        <div className="absolute top-8 left-8 hidden lg:block" style={{ zIndex: 2 }}>
-          <div className="w-7 h-0.5 bg-primary/60" />
-          <div className="h-7 w-0.5 bg-primary/60" />
-        </div>
-        <div className="absolute top-8 right-8 hidden lg:block" style={{ zIndex: 2 }}>
-          <div className="w-7 h-0.5 bg-primary/60 ml-auto" />
-          <div className="h-7 w-0.5 bg-primary/60 ml-auto" />
-        </div>
-
-        {/* z-3: All foreground content */}
-        <div className="relative flex flex-col items-center text-center" style={{ zIndex: 3 }}>
-
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            style={isDesktop ? { opacity: badgeOp } : undefined}
-            className="mb-10 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-[11px] font-black tracking-[0.2em] text-primary uppercase backdrop-blur-sm"
-          >
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            {t.tag}
-          </motion.div>
-
-          {/* Main title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.15, ease: [0.21, 0.45, 0.15, 1.0] }}
-            style={isDesktop ? { opacity: headOp, y: headY } : undefined}
-            className="text-[clamp(3rem,10vw,9rem)] font-black leading-[0.88] tracking-tighter uppercase dark:text-white text-foreground dark:drop-shadow-lg"
-          >
-            {lang === "uz" ? (
-              <>Raqamli<br /><span className="text-primary">Shartnoma</span></>
-            ) : (
-              <>Цифровой<br /><span className="text-primary">Контракт</span></>
-            )}
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.55, duration: 0.8 }}
-            style={isDesktop ? { opacity: subOp } : undefined}
-            className="mx-auto mt-8 max-w-lg text-sm font-medium leading-relaxed dark:text-white/60 text-muted-foreground sm:text-base"
-          >
-            {t.subtitle}
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.75, duration: 0.6 }}
-            style={isDesktop ? { opacity: ctaOp } : undefined}
-            className="mt-10 flex flex-col gap-3 sm:flex-row"
-          >
-            <Link
-              href={isAuthenticated ? "/dashboard" : "/register"}
-              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary px-9 py-4 text-base font-black text-white shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:shadow-primary/40 active:scale-95"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                {isAuthenticated ? t.toDashboard : t.start}
-                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-              </span>
-              <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
-            </Link>
-
-            <Link
-              href="/about"
-              className="flex items-center justify-center gap-2 rounded-2xl border dark:border-white/20 border-border dark:bg-white/8 bg-background/80 px-9 py-4 text-base font-black dark:text-white text-foreground backdrop-blur-sm transition-all dark:hover:border-white/40 hover:border-primary/40 dark:hover:bg-white/15 hover:bg-secondary"
-            >
-              {t.howItWorks}
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Scroll indicator (z-3) */}
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          style={{ zIndex: 3, ...(isDesktop ? { opacity: scrollOp } : {}) }}
-          className="absolute bottom-10 flex flex-col items-center gap-2 dark:text-white/30 text-foreground/30"
-        >
-          <span className="text-[9px] font-black uppercase tracking-[0.35em]">scroll</span>
-          <ChevronDown size={14} />
-        </motion.div>
-
-        {/* Side rule lines (z-2) */}
-        <div
-          className="absolute left-8 top-1/2 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex"
-          style={{ zIndex: 2 }}
-        >
-          {[18, 7, 14, 7, 10].map((w, i) => (
-            <motion.div
-              key={i}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 1 + i * 0.06, duration: 0.4 }}
-              style={{ width: w }}
-              className="h-px origin-left bg-primary/50"
-            />
-          ))}
-        </div>
-
-        {/* Bottom fade → dark scrub sections (dark mode only) */}
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none hidden dark:block"
-          style={{ height: 120, background: "linear-gradient(to bottom, transparent, #0a1410)", zIndex: 5 }}
-        />
-      </section>
-      </div>{/* end heroRef wrapper */}
+      {/* ── HERO ────────────────────────────────────────────────── */}
+      <HeroSection isAuthenticated={isAuthenticated} />
 
       {/* ── SCROLL SCRUB A: Ishonchga asoslangan kelishuv ──────── */}
       <ScrollScrubA lang={lang} />
